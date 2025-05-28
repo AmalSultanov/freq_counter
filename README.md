@@ -60,7 +60,7 @@ freq_counter/
 
 4. **Create a `.env` file and set environment variables in any editor**
 
-   Refer to  [⚙️ Environment Variables](#⚙️-environment-variables) section for  clarification.
+   Refer to  [⚙️ Environment Variables](#%EF%B8%8F-environment-variables) section for  clarification.
 
    ```bash
    cp .env.example .env
@@ -85,7 +85,7 @@ freq_counter/
 
 1. **Create a `.env` file and set environment variables in any editor**
 
-   Refer to  [⚙️ Environment Variables](#⚙️-environment-variables) section for  clarification.
+   Refer to  [⚙️ Environment Variables](#%EF%B8%8F-environment-variables) section for  clarification.
 
    ```bash
    cp .env.example .env
