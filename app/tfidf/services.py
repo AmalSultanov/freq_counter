@@ -48,7 +48,7 @@ def tokenize_text(text: str) -> list[str]:
 
 
 def calculate_tf_idf(
-        word_counts: Counter, total_words: int
+    word_counts: Counter, total_words: int
 ) -> dict[str, list[str | float | int]]:
     table_data = {"word": [], "tf": [], "idf": []}
 

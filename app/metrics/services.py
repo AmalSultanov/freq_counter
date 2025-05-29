@@ -19,7 +19,7 @@ def create_file_metric(
     return metric
 
 
-def get_uploads_count() -> int | None:
+def get_uploads_count() -> int:
     today = date.today()
     result = (
         db.session.query(func.count().label("uploads_count"))
@@ -27,14 +27,15 @@ def get_uploads_count() -> int | None:
         .scalar()
     )
 
-    return result
+    return result or 0
 
 
-def get_largest_file() -> int | None:
+def get_largest_file() -> int:
     largest_size = (
         db.session.query(FileMetricModel.file_size)
         .order_by(FileMetricModel.file_size.desc())
         .limit(1)
         .scalar()
     )
-    return largest_size
+
+    return largest_size or 0
