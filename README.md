@@ -9,34 +9,37 @@ A Python web application that processes uploaded `.txt` files and computes the  
 ```
 freq_counter/
 │
-├── app/                         # Main application package
-│   ├── media/                   # Uploaded text files
-│   ├── metrics/                 # Metrics models, routes, and services
+├── app/                         # main application package
+│   ├── media/                   # uploaded text files
+│   ├── metrics/                 # metrics models, routes, and services
 │   ├── templates/               # HTML templates
 │   ├── tfidf/                    # TF-IDF routes and services
-│   ├── __init__.py              # App factory initialization
+│   ├── __init__.py              # app factory initialization
 │   ├── config.py                 # Base, Development and Production configurations
 │   ├── database.py              # SQLAlchemy setup
-│   └── version.py               # App versioning
+│   └── version.py               # app versioning
 │
 ├── migrations/                  # Alembic migration scripts
 ├── .dockerignore                
 ├── .env                         
-├── .env.example                 # Example env file for reference
+├── .env.example                 # example env file for reference
 ├── .gitignore                   
 ├── CHANGELOG.md                 
 ├── docker-compose.yml           
 ├── Dockerfile                    
+├── nginx.template.conf          # configurations for Nginx       
 ├── README.md                    
 ├── requirements.txt             
-└── run.py                       # Entry point for running the app
+└── run.py                       # entry point for running the app
 ```
 
 ---
 
 ## 🚀 How to Run the App
 
-### 🔧 Without Docker
+### 🔧 Without Docker 
+> ⚠️ **Note:** Nginx is configured to run **only inside the Docker container**.  
+> If you run the app without Docker, Nginx will **not** be available, and you should access the Flask app directly.
 
 1. **Clone the repository**
 
@@ -105,7 +108,7 @@ freq_counter/
    docker compose up --build
    ```
 
-4. The app will be available at `http://127.0.0.1:FLASK_PORT`.
+4. The app will be available at `http://127.0.0.1`.
 
 ---
 
