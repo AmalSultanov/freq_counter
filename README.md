@@ -83,7 +83,14 @@ freq_counter/
 
 ### 🐳 With Docker
 
-1. **Create a `.env` file and set environment variables in any editor**
+1. **Clone the repository**
+
+   ```bash
+   git clone https://github.com/AmalSultanov/freq_counter
+   cd freq_counter
+   ```
+
+2. **Create a `.env` file and set environment variables in any editor**
 
    Refer to  [⚙️ Environment Variables](#%EF%B8%8F-environment-variables) section for  clarification.
 
@@ -92,13 +99,13 @@ freq_counter/
    nano .env
    ```
 
-2. **Build and run using Docker Compose**
+3. **Build and run using Docker Compose**
 
    ```bash
    docker compose up --build
    ```
 
-3. The app will be available at `http://127.0.0.1:FLASK_PORT`.
+4. The app will be available at `http://127.0.0.1:FLASK_PORT`.
 
 ---
 
