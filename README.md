@@ -36,55 +36,7 @@ freq_counter/
 ---
 
 ## 🚀 How to Run the App
-
-### 🔧 Without Docker 
-> ⚠️ **Note:** Nginx is configured to run **only inside the Docker container**.  
-> If you run the app without Docker, Nginx will **not** be available, and you should access the Flask app directly.
-
-1. **Clone the repository**
-
-   ```bash
-   git clone https://github.com/AmalSultanov/freq_counter
-   cd freq_counter
-   ```
-
-2. **Create and activate a virtual environment**
-
-   ```bash
-   python3 -m venv .venv
-   source .venv/bin/activate  # On Windows: .venv\Scripts\activate
-   ```
-
-3. **Install dependencies**
-
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-4. **Create a `.env` file and set environment variables in any editor**
-
-   Refer to  [⚙️ Environment Variables](#%EF%B8%8F-environment-variables) section for  clarification.
-
-   ```bash
-   cp .env.example .env
-   nano .env
-   ```
-
-5. **Run migrations**
-
-   ```bash
-   flask db upgrade
-   ```
-
-6. **Run the app**
-
-   ```bash
-   flask run
-   ```
-   The app will be available at `http://127.0.0.1:FLASK_PORT`.
----
-
-### 🐳 With Docker
+### 🐳 Using Docker
 
 1. **Clone the repository**
 
@@ -142,7 +94,7 @@ __version__ = "0.1.1"
 ## 📓 Recent Changes
 
 * Major project changes include refactoring and modularization.
-* Docker support and PostgreSQL integration.
+* Docker support, PostgreSQL, Nginx and Gunicorn integration.
 * Configurations and migrations management as well as version tracking.
 
 For a full list of changes, refer to the [CHANGELOG.md](./CHANGELOG.md).

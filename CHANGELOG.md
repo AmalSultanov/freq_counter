@@ -2,8 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
-and this project adheres to [Semantic Versioning](https://semver.org).
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this project adheres to [Semantic Versioning](https://semver.org).
 
 ---
 ## 0.1.1 - (2025-05-27)
@@ -17,9 +16,10 @@ and this project adheres to [Semantic Versioning](https://semver.org).
 - `config.py` inside `app/` for centralized configuration management
 - `.env` and `.env.example` files for environment variables management
 - `migrations/` package for database schema migrations by Alembic
-- Docker support (`Dockerfile`, `docker-compose.yml`) to containerize the app and PostgreSQL
+- Docker support (`Dockerfile`, `docker-compose.yml`) to containerize the app, PostgreSQL and Nginx
 - `CHANGELOG.md` for tracking project related updates
-- `.dockerignore`.
+- `.dockerignore`
+- Gunicorn support
 
 ### Changed
 - `app/` package is now main application package
