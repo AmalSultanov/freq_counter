@@ -12,7 +12,7 @@ services:
     volumes:
       - .:/app
     command: >
-      sh -c "flask db upgrade && flask run --host=0.0.0.0"
+      sh -c "flask db upgrade && gunicorn -w 4 -b 0.0.0.0:${FLASK_PORT} run:app"
 
   metrics_db:
     image: postgres:16-alpine
