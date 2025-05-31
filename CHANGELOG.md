@@ -16,7 +16,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) 
 - `config.py` inside `app/` for centralized configuration management
 - `.env` and `.env.example` files for environment variables management
 - `migrations/` package for database schema migrations by Alembic
-- Docker support (`Dockerfile`, `docker-compose.yml`) to containerize the app, PostgreSQL and Nginx
+- Docker support (`Dockerfile`, `docker-compose.yml`) to containerize the app, PostgreSQL with web pgAdmin and Nginx
 - `CHANGELOG.md` for tracking project related updates
 - `.dockerignore`
 - Gunicorn support
