@@ -76,6 +76,9 @@ The application uses the following environment variables (see `.env.example`):
 * `POSTGRES_HOST` - postgres host, for example 'localhost' or service name of PostgreSQL container if using Docker Compose
 * `POSTGRES_PORT` - port number for postgres, for example 5432
 * `POSTGRES_DB` - postgres database name
+* `PGADMIN_DEFAULT_EMAIL` - email for authentication in web pgAdmin dashboard
+* `PGADMIN_DEFAULT_PASSWORD` - password for authentication in web pgAdmin dashboard
+* `PGADMIN_PORT` - port number for pgAdmin service
 
 You can customize these based on your local or production environment.
 
