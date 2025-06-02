@@ -20,6 +20,7 @@ freq_counter/
 │   └── version.py               # app versioning
 │
 ├── migrations/                  # Alembic migration scripts
+├── nginx/                       # Nginx related configurations
 ├── .dockerignore                
 ├── .env                         
 ├── .env.example                 # example env file for reference
@@ -27,7 +28,6 @@ freq_counter/
 ├── CHANGELOG.md                 
 ├── docker-compose.yml           
 ├── Dockerfile                    
-├── nginx.template.conf          # configurations for Nginx       
 ├── README.md                    
 ├── requirements.txt             
 └── run.py                       # entry point for running the app
@@ -76,9 +76,6 @@ The application uses the following environment variables (see `.env.example`):
 * `POSTGRES_HOST` - postgres host, for example 'localhost' or service name of PostgreSQL container if using Docker Compose
 * `POSTGRES_PORT` - port number for postgres, for example 5432
 * `POSTGRES_DB` - postgres database name
-* `PGADMIN_DEFAULT_EMAIL` - email for authentication in web pgAdmin dashboard
-* `PGADMIN_DEFAULT_PASSWORD` - password for authentication in web pgAdmin dashboard
-* `PGADMIN_PORT` - port number for pgAdmin service
 
 You can customize these based on your local or production environment.
 
