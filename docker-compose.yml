@@ -33,6 +33,7 @@ services:
       - "80:80"
     volumes:
       - ./nginx/nginx.template.conf:/etc/nginx/templates/default.conf.template:ro
+      - ./nginx/logs:/var/log/nginx
     env_file:
       - .env
     depends_on:
