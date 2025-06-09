@@ -1,22 +1,17 @@
-from flask import Blueprint, jsonify, redirect
+from flask import Blueprint, jsonify
 
 from app.metrics.services import get_uploads_count, get_largest_file
 from app.version import __version__
 
-metrics_bp = Blueprint("metrics", __name__)
+metrics_api_bp = Blueprint("metrics_api", __name__)
 
 
-@metrics_bp.route("/")
-def get_homepage():
-    return redirect("/tfidf")
-
-
-@metrics_bp.route("/status")
+@metrics_api_bp.route("/status")
 def get_status():
     return jsonify({"status": "OK"}), 200
 
 
-@metrics_bp.route("/metrics")
+@metrics_api_bp.route("/metrics")
 def get_metrics():
     return jsonify(
         {
@@ -26,6 +21,6 @@ def get_metrics():
     )
 
 
-@metrics_bp.route("/version")
+@metrics_api_bp.route("/version")
 def get_version():
     return jsonify({"version": __version__}), 200
