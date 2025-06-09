@@ -2,8 +2,8 @@ from datetime import date
 
 from sqlalchemy import func
 
-from app import db
-from app.metrics.models import FileMetricModel
+from app.database import db
+from app.system.models import FileMetricModel
 
 
 def create_file_metric(
