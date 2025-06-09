@@ -6,19 +6,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) 
 
 ---
 ## 0.1.1 - (2025-05-27)
+
 ### Added
-- `tfidf/` package with endpoints and services inside `app/`
-- `metrics/` package with endpoints, services and a single model for metrics tracking inside `app/`. The proposed metrics are:
+- `tfidf/` package with endpoints and services for web interface
+- `metrics/` package with endpoints, services and a single model for metrics tracking. The proposed metrics are:
   - `uploads_count_per_day` - number of uploaded documents within a day, helps to understand the daily load on the app
   - `largest_file_size_in_bytes` - the largest file size that was uploaded so far, can reflect the performance tendency of app in case of large document size
-- `database.py` for handling SQLAlchemy connection setup inside `app/`
-- `version.py` inside `app/` to track the current app version
-- `config.py` inside `app/` for centralized configuration management
+- `database.py` for SQLAlchemy setup 
+- `version.py` to track the current app version
+- `config.py` for centralized configuration management
 - `.env` and `.env.example` files for environment variables management
 - `migrations/` package for database schema migrations by Alembic
-- Docker support (`Dockerfile`, `docker-compose.yml`) to containerize the app, PostgreSQL and Nginx
+- Docker support with PostgreSQL and Nginx (`Dockerfile`, `docker-compose.yml`, `.dockerignore`)
 - `CHANGELOG.md` for tracking project related updates
-- `.dockerignore`
 - Gunicorn support
 
 ### Changed
@@ -27,7 +27,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) 
 - Rename `app.py` to `run.py` and move app initialization to `app/__init__.py`
 
 ### Fixed
-- Improved modularity through better separation of concerns
+- Modularity was improved through better separation of concerns
 
 ---
 
