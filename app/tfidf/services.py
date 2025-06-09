@@ -8,7 +8,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from werkzeug.datastructures import FileStorage
 from werkzeug.utils import secure_filename
 
-from app.metrics.services import create_file_metric
+from app.system.services import create_file_metric
 
 
 def get_table_data(file: FileStorage) -> list[dict[str, str | float | int]]:

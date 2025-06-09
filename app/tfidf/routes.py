@@ -2,10 +2,10 @@ from flask import render_template, request, Blueprint
 
 from app.tfidf.services import get_table_data
 
-tfidf_bp = Blueprint("tfidf", __name__, url_prefix="/tfidf")
+tfidf_bp = Blueprint("tfidf", __name__)
 
 
-@tfidf_bp.route("/", methods=["GET", "POST"])
+@tfidf_bp.route("", methods=["GET", "POST"])
 def upload_file():
     if request.method == "POST":
         file = request.files.get("file")
