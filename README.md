@@ -1,6 +1,6 @@
 # Frequency Counter
 
-A Python web application that processes uploaded `.txt` files and computes the  TF-IDF (Term Frequency–Inverse Document Frequency) scores for the words in the  document.
+A Flask-based backend that exposes endpoints for uploading .txt documents, organizing them into collections, and computing text statistics like TF-IDF. It also manages users and system metrics, with a minimal frontend included for basic interaction.
 
 ---
 
@@ -9,29 +9,78 @@ A Python web application that processes uploaded `.txt` files and computes the  
 ```
 freq_counter/
 │
-├── app/                         # main application package
-│   ├── media/                   # uploaded text files
-│   ├── metrics/                 # metrics models, routes, and services
-│   ├── templates/               # HTML templates
-│   ├── tfidf/                    # TF-IDF routes and services
-│   ├── __init__.py              # app factory initialization
-│   ├── config.py                 # Base, Development and Production configurations
-│   ├── database.py              # SQLAlchemy setup
-│   └── version.py               # app versioning
+├── app/                          # Main Flask application package
+│   |
+│   ├── collections/              # Management of document groupings
+│   │   ├── __init__.py                
+│   │   ├── api_routes.py         # JSON API endpoints 
+│   │   ├── decorators.py         # Decorators for validating collections before operating over them
+│   │   ├── models.py             # SQLAlchemy models
+│   │   ├── routes.py             # Future HTML-rendering routes (currently not implemented)
+│   │   └── services.py           # Business logic 
+│   |
+│   ├── documents/                # Handles document upload, processing, and metadata
+│   │   ├── __init__.py
+│   │   ├── api_routes.py         # JSON API endpoints 
+│   │   ├── decorators.py         # Decorators for validating documents before operating over them
+│   │   ├── error_handlers.py     # Custom error handlers 
+│   │   ├── models.py             # SQLAlchemy models
+│   │   ├── routes.py             # Future HTML-rendering views (currently empty)
+│   │   └── services.py           # Business logic 
+│   |
+│   ├── media/                    # Directory for storing uploaded text documents
+│   |
+│   ├── shared/                   # Shared helpers and base components
+│   │   ├── __init__.py
+│   │   ├── common_models.py      # Reusable SQLAlchemy models
+│   │   ├── exceptions.py         # Custom exception classes
+│   │   ├── file_utils.py         # Utility functions for validating files
+│   │   └── tfidf_stats.py        # Helpers for calculating TF-IDF values
+│   |
+│   ├── system/                   # Tracks runtime metrics, logs, and app status
+│   │   ├── __init__.py
+│   │   ├── api_routes.py         # JSON endpoints for system health, metrics, logs
+│   │   ├── models.py             # Models for system metrics information 
+│   │   └── services.py           # Aggregates and computes metrics or status values
+│   |
+│   ├── templates/                # Jinja2 HTML templates (used in `routes.py`)
+│   |
+│   ├── tfidf/                    # Web interface for documents uploading (not fully implemented)
+│   │   ├── __init__.py
+│   │   ├── routes.py             # HTML endpoints for viewing TF-IDF results
+│   │   └── services.py           # Business logic 
+│   |
+│   ├── users/                    # Authentication and user management
+│   │   ├── __init__.py
+│   │   ├── api_routes.py         # JSON endpoints for login, register, etc.
+│   │   ├── decorators.py         # Decorators checking authorization
+│   │   ├── models.py             # User related models
+│   │   └── services.py           # Password hashing, token logic, etc.
+│   |
+│   ├── __init__.py               # Flask app factory which creates and configures the app
+│   ├── config.py                 # Config classes 
+│   ├── database.py               # SQLAlchemy engine initialization
+│   └── version.py                # App version info
 │
-├── migrations/                  # Alembic migration scripts
-├── nginx/                       # Nginx related configurations
-├── .dockerignore                
-├── .env                         
-├── .env.example                 # example env file for reference
-├── .gitignore                   
-├── CHANGELOG.md                 
-├── docker-compose.yml           
-├── Dockerfile                    
-├── README.md                    
-├── requirements.txt             
-└── run.py                       # entry point for running the app
+├── migrations/                   # Alembic migrations
+├── nginx/                        # Nginx related configurations
+├── .dockerignore                 
+├── .env                          
+├── .env.example                  # Sample .env
+├── .gitignore                    
+├── CHANGELOG.md                  
+├── docker-compose.yml            
+├── Dockerfile                     
+├── README.md                     
+├── requirements.txt              
+└── run.py                        
 ```
+
+---
+
+## 🖼️ Entities Involved
+
+
 
 ---
 
@@ -68,14 +117,19 @@ freq_counter/
 
 The application uses the following environment variables (see `.env.example`):
 
-* `FLASK_PORT` - port number for Flask application, for example 5000
-* `FLASK_DEBUG` - debug value, True or False
-* `FLASK_ENV` - environment value, 'dev' or 'prod'
-* `POSTGRES_USER` - user for postgres, for example 'postgres'
-* `POSTGRES_PASSWORD`- password for postgres
-* `POSTGRES_HOST` - postgres host, for example 'localhost' or service name of PostgreSQL container if using Docker Compose
-* `POSTGRES_PORT` - port number for postgres, for example 5432
-* `POSTGRES_DB` - postgres database name
+* `FLASK_PORT` - Port number for the Flask application (e.g., `5000`)
+* `FLASK_DEBUG` - Enable debug mode (`True` or `False`)
+* `FLASK_ENV` - Application environment (`dev` or `prod`)
+* `JWT_SECRET_KEY ` - Secret key for signing JWT tokens
+* `JWT_COOKIE_CSRF_PROTECT ` - Enable CSRF protection on cookies (`True` or `False`)
+* `JWT_COOKIE_SECURE ` - Send cookies only over HTTPS (`True` for production, `False` for development)
+* `JWT_ACCESS_TOKEN_EXPIRES_MINUTES ` - Access token expiration time in minutes (e.g., `15`)
+* `JWT_REFRESH_TOKEN_EXPIRES_DAYS ` - Refresh token expiration time in days (e.g., `30`)
+* `POSTGRES_USER` - PostgreSQL username (e.g., `postgres`)
+* `POSTGRES_PASSWORD`- PostgreSQL password
+* `POSTGRES_HOST` - Host for PostgreSQL (e.g., `localhost` or a Docker Compose service name)
+* `POSTGRES_PORT` - Port number for PostgreSQL (e.g., `5432`)
+* `POSTGRES_DB` - PostgreSQL database name
 
 You can customize these based on your local or production environment.
 
@@ -86,16 +140,15 @@ You can customize these based on your local or production environment.
 The current app version is defined in `app/version.py`:
 
 ```python
-__version__ = "0.1.1"
+__version__ = "0.2.0"
 ```
 
 ---
 
 ## 📓 Recent Changes
 
-* Major project changes include refactoring and modularization.
-* Docker support, PostgreSQL, Nginx and Gunicorn integration.
-* Configurations and migrations management as well as version tracking.
+* New entities: documents, collections, users
+* JWT integration
 
 For a full list of changes, refer to the [CHANGELOG.md](./CHANGELOG.md).
 
