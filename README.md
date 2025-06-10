@@ -80,7 +80,7 @@ freq_counter/
 
 ## 🖼️ Entities Involved
 
-
+<img width="1018" alt="Screenshot 2025-06-09 at 23 06 36" src="https://github.com/user-attachments/assets/6e8e9039-23c9-4d4c-be04-e14a6ce6442b" />
 
 ---
 
