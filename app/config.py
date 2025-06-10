@@ -10,9 +10,6 @@ flask_debug = os.getenv("FLASK_DEBUG")
 flask_env = os.getenv("FLASK_ENV")
 
 jwt_secret_key = os.getenv("JWT_SECRET_KEY")
-jwt_token_location = os.getenv("JWT_TOKEN_LOCATION")
-jwt_access_cookie_path = os.getenv("JWT_ACCESS_COOKIE_PATH")
-jwt_refresh_cookie_path = f"{os.getenv('JWT_REFRESH_COOKIE_PATH')}"
 jwt_cookie_csrf_protect = os.getenv("JWT_COOKIE_CSRF_PROTECT")
 jwt_cookie_secure = os.getenv("JWT_COOKIE_SECURE")
 jwt_access_token_expires_minutes = int(os.getenv(
@@ -38,9 +35,9 @@ class Config:
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     MEDIA_FOLDER = os.path.join(os.path.dirname(__file__), "media")
     JWT_SECRET_KEY = jwt_secret_key
-    JWT_TOKEN_LOCATION = jwt_token_location
-    JWT_ACCESS_COOKIE_PATH = jwt_access_cookie_path
-    JWT_REFRESH_COOKIE_PATH = jwt_refresh_cookie_path
+    JWT_TOKEN_LOCATION = "cookies"
+    JWT_ACCESS_COOKIE_PATH = "/"
+    JWT_REFRESH_COOKIE_PATH = "/api/users/refresh"
     JWT_COOKIE_CSRF_PROTECT = jwt_cookie_csrf_protect
     JWT_COOKIE_SECURE = jwt_cookie_secure
     JWT_ACCESS_TOKEN_EXPIRES = timedelta(
