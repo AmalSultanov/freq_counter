@@ -16,6 +16,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) 
 ### Changed
 - Structure of `media/`: folders inside are named after usernames
 - Rename `metrics/` to `system/` to reflect logs and system-level information
+- Migrate from standard Flask routes to Flask-RESTX for better API structure, documentation, and Swagger support
 
 ### Fixed
 - Duplicate documents now cannot be uploaded
