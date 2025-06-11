@@ -4,6 +4,18 @@ A Flask-based backend that exposes endpoints for uploading .txt documents, organ
 
 ---
 
+## Contents
+
+* [Project Structure](#-project-structure)
+* [Entities Involved](#%EF%B8%8F-entities-involved)
+* [How to Run the App](#-how-to-run-the-app)
+* [Environment Variables](#%EF%B8%8F-environment-variables)
+* [App Version](#-app-version)
+* [Recent Changes](#-recent-changes)
+* [References](#-references)
+
+---
+
 ## 📁 Project Structure
 
 ```
@@ -13,18 +25,22 @@ freq_counter/
 │   |
 │   ├── collections/              # Management of document groupings
 │   │   ├── __init__.py                
+│   │   ├── api_models.py         # API schema definitions
 │   │   ├── api_routes.py         # JSON API endpoints 
 │   │   ├── decorators.py         # Decorators for validating collections before operating over them
 │   │   ├── models.py             # SQLAlchemy models
+│   │   ├── namespace.py          # Namespace registration, like a blueprint
 │   │   ├── routes.py             # Future HTML-rendering routes (currently not implemented)
 │   │   └── services.py           # Business logic 
 │   |
 │   ├── documents/                # Handles document upload, processing, and metadata
 │   │   ├── __init__.py
+│   │   ├── api_models.py         # API schema definitions 
 │   │   ├── api_routes.py         # JSON API endpoints 
 │   │   ├── decorators.py         # Decorators for validating documents before operating over them
 │   │   ├── error_handlers.py     # Custom error handlers 
 │   │   ├── models.py             # SQLAlchemy models
+│   │   ├── namespace.py          # Namespace registration, like a blueprint
 │   │   ├── routes.py             # Future HTML-rendering views (currently empty)
 │   │   └── services.py           # Business logic 
 │   |
@@ -41,6 +57,7 @@ freq_counter/
 │   │   ├── __init__.py
 │   │   ├── api_routes.py         # JSON endpoints for system health, metrics, logs
 │   │   ├── models.py             # Models for system metrics information 
+│   │   ├── namespace.py          # Namespace registration, like a blueprint
 │   │   └── services.py           # Aggregates and computes metrics or status values
 │   |
 │   ├── templates/                # Jinja2 HTML templates (used in `routes.py`)
@@ -52,9 +69,11 @@ freq_counter/
 │   |
 │   ├── users/                    # Authentication and user management
 │   │   ├── __init__.py
+│   │   ├── api_models.py         # API schema definitions
 │   │   ├── api_routes.py         # JSON endpoints for login, register, etc.
 │   │   ├── decorators.py         # Decorators checking authorization
 │   │   ├── models.py             # User related models
+│   │   ├── namespace.py          # Namespace registration, like a blueprint
 │   │   └── services.py           # Password hashing, token logic, etc.
 │   |
 │   ├── __init__.py               # Flask app factory which creates and configures the app
