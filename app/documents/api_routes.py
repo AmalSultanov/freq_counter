@@ -1,87 +1,154 @@
-from flask import Blueprint, jsonify, request
-from flask_jwt_extended import get_jwt_identity, verify_jwt_in_request
+from flask import request
+from flask_jwt_extended import get_jwt_identity, jwt_required
+from flask_restx import Resource
 
+from app.documents.api_models import (
+    document_model, message_model, document_content_model, statistics_model
+)
 from app.documents.decorators import ensure_user_document_exists
 from app.documents.error_handlers import register_documents_errors_handlers
+from app.documents.namespace import api
 from app.documents.services import (
     get_documents_by_username, remove_document, get_document_tf, add_document,
     fetch_document_contents, get_collections_idf_data
 )
 from app.shared.file_utils import is_file_invalid
 
-documents_api_bp = Blueprint("documents", __name__)
-register_documents_errors_handlers(documents_api_bp)
+register_documents_errors_handlers(api)
+
+upload_parser = api.parser()
+upload_parser.add_argument(
+    'file',
+    location='files',
+    type='FileStorage',
+    required=True,
+    help='A .txt file to upload'
+)
 
 
-@documents_api_bp.before_request
-def require_jwt():
-    verify_jwt_in_request()
+class SecuredResource(Resource):
+    method_decorators = [jwt_required()]
 
 
-@documents_api_bp.post("")
-def upload_document():
-    file = request.files.get("file")
+@api.route("")
+class DocumentsListResource(SecuredResource):
+    @api.doc(
+        description="Get all documents for the current user",
+        security="BearerAuth",
+        responses={
+            200: ("Documents were fetched", [document_model]),
+            401: ("Missing JWT in headers or cookie", message_model),
+        }
+    )
+    def get(self):
+        """List documents for the current user"""
+        username = get_jwt_identity()
+        documents = get_documents_by_username(username)
 
-    if is_file_invalid(file):
-        return jsonify({"message": "Only .txt files are allowed"}), 400
+        if not documents:
+            return [], 200
 
-    username = get_jwt_identity()
-    document = add_document(file, username)
+        return [
+            {"document_id": doc.id, "document_name": doc.name}
+            for doc in documents
+        ], 200
 
-    return jsonify({
-        "message": f"Document with id = {document.id} was uploaded"
-    }), 201
+    @api.expect(upload_parser)
+    @api.doc(
+        description="Upload a new .txt document",
+        security="BearerAuth",
+        consumes=["multipart/form-data"],
+        responses={
+            201: ("Document was uploaded", message_model),
+            400: ("Document is empty", message_model),
+            401: ("Missing JWT in headers or cookie", message_model),
+            409: ("Duplicate document is not allowed", message_model)
+        }
+    )
+    def post(self):
+        """Upload a document"""
+        file = request.files.get("file")
 
+        if is_file_invalid(file):
+            return {"message": "Only .txt files are allowed"}, 400
 
-@documents_api_bp.get("")
-def get_user_documents():
-    username = get_jwt_identity()
-    documents = get_documents_by_username(username)
+        username = get_jwt_identity()
+        document = add_document(file, username)
 
-    if not documents:
-        return jsonify([]), 200
-
-    return jsonify([
-        {"document_id": document.id, "document_name": document.name}
-        for document in documents
-    ]), 200
-
-
-@documents_api_bp.get("/<int:document_id>")
-@ensure_user_document_exists
-def get_document_contents(document_id: int):
-    document_data = fetch_document_contents(document_id)
-
-    return jsonify({
-        "document_id": document_data.id,
-        "document_contents": document_data.contents
-    }), 200
+        return {
+            "message": f"Document with id = {document.id} was uploaded"}, 201
 
 
-@documents_api_bp.get("/<int:document_id>/statistics")
-@ensure_user_document_exists
-def get_document_statistics(document_id: int):
-    tf = get_document_tf(document_id)
-    collections_data = get_collections_idf_data(document_id, tf)
+@api.route("/<int:document_id>")
+@api.param("document_id", "The document identifier")
+class DocumentContentsResource(SecuredResource):
+    @api.doc(
+        description="Fetch document contents",
+        security="BearerAuth",
+        responses={
+            200: ("Document was found", document_content_model),
+            401: ("Missing JWT in headers or cookie", message_model),
+            404: ("User does not have this document", message_model)
+        }
+    )
+    @ensure_user_document_exists
+    def get(self, document_id):
+        """Get document contents"""
+        document_data = fetch_document_contents(document_id)
 
-    if collections_data is None:
-        message = "Document is not part of any collection, IDF is unavailable"
-        return jsonify({
+        return {
+            "document_id": document_data.id,
+            "document_contents": document_data.contents
+        }, 200
+
+    @api.doc(
+        description="Delete a document by ID",
+        security="BearerAuth",
+        responses={
+            200: ("Document deleted", message_model),
+            401: ("Missing JWT in headers or cookie", message_model),
+            404: ("User does not have this document", message_model)
+        }
+    )
+    @ensure_user_document_exists
+    def delete(self, document_id):
+        """Delete a document"""
+        username = get_jwt_identity()
+        remove_document(document_id, username)
+
+        return {"message": "Document was deleted"}, 200
+
+
+@api.route("/<int:document_id>/statistics")
+@api.param("document_id", "The document identifier")
+class DocumentStatisticsResource(SecuredResource):
+    @api.doc(
+        description="Get TF-IDF statistics for a document if it belongs to "
+                    "any collection, if not, get only TF stats with message "
+                    "that document should be in at least 1 collection to get "
+                    "IDF values",
+        security="BearerAuth",
+        responses={
+            200: ("Document was found", statistics_model),
+            401: ("Missing JWT in headers or cookie", message_model),
+            404: ("User does not have this document", message_model)
+        }
+    )
+    @ensure_user_document_exists
+    def get(self, document_id):
+        """Get TF-IDF statistics"""
+        tf = get_document_tf(document_id)
+        collections_data = get_collections_idf_data(document_id, tf)
+
+        if collections_data is None:
+            msg = "Document is not part of any collection, IDF is unavailable"
+            return {
+                "document_id": document_id,
+                "tf": tf,
+                "message": msg
+            }, 200
+
+        return {
             "document_id": document_id,
-            "tf": tf,
-            "message": message
-        }), 200
-
-    return jsonify({
-        "document_id": document_id,
-        "collections_data": collections_data
-    }), 200
-
-
-@documents_api_bp.delete("/<int:document_id>")
-@ensure_user_document_exists
-def delete_document(document_id: int):
-    username = get_jwt_identity()
-    remove_document(document_id, username)
-
-    return jsonify({"message": f"Document was deleted"}), 200
+            "collections_data": collections_data
+        }, 200
