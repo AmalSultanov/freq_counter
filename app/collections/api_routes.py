@@ -1,93 +1,151 @@
-from flask import Blueprint, jsonify, request
-from flask_jwt_extended import verify_jwt_in_request, get_jwt_identity
+from flask import request
+from flask_jwt_extended import get_jwt_identity, jwt_required
+from flask_restx import Resource, fields
 
+from app.collections.api_models import (
+    collection_response, collection_input, message_model, statistics_response
+)
 from app.collections.decorators import (
     ensure_user_collection_exists, ensure_user_document_exists,
     ensure_document_not_in_collection, ensure_document_in_collection
 )
+from app.collections.namespace import api
 from app.collections.services import (
     get_collections_list, get_documents_by_collection_id, get_collection_stats,
     add_document_to_collection, delete_document_from_collection,
     add_collection
 )
 
-collections_api_bp = Blueprint("collections", __name__)
+
+class SecuredResource(Resource):
+    method_decorators = [jwt_required()]
 
 
-@collections_api_bp.before_request
-def require_jwt():
-    verify_jwt_in_request()
+@api.route("")
+class CollectionListResource(SecuredResource):
+    @api.doc(
+        description="Get list of user collections and documents in them",
+        security="BearerAuth",
+        responses={
+            200: ("Success", [collection_response]),
+            401: ("Missing JWT in headers or cookie", message_model)
+        }
+    )
+    def get(self):
+        """List current user's collections with documents in them"""
+        username = get_jwt_identity()
+        collections = get_collections_list(username)
+
+        if not collections:
+            return [], 200
+
+        result = []
+        for collection in collections:
+            documents = [{
+                "document_id": document.document.id,
+                "document_name": document.document.name}
+                for document in collection.documents
+            ]
+            result.append(
+                {"collection_id": collection.id, "documents": documents})
+
+        return result, 200
+
+    @api.doc(
+        description="Create a new collection",
+        security="BearerAuth",
+        responses={
+            201: ("Collection created", message_model),
+            401: ("Missing JWT in headers or cookie", message_model)
+        }
+    )
+    @api.expect(collection_input)
+    def post(self):
+        """Create a new collection"""
+        username = get_jwt_identity()
+        collection_name = request.json.get("collection_name")
+        collection = add_collection(username, collection_name)
+
+        return {
+            "message": f"Collection with id = {collection.id} was created"
+        }, 201
 
 
-@collections_api_bp.post("")
-def create_collection():
-    username = get_jwt_identity()
-    collection_name = request.json.get("collection_name")
-    collection = add_collection(username, collection_name)
+@api.route("/<int:collection_id>")
+@api.param("collection_id", "The collection identifier")
+class CollectionDocumentsResource(SecuredResource):
+    @api.doc(
+        description="Get document IDs in a collection",
+        security="BearerAuth",
+        responses={
+            200: ("Success", fields.List(fields.Integer)),
+            401: ("Missing JWT in headers or cookie", message_model)
+        }
+    )
+    @ensure_user_collection_exists
+    def get(self, collection_id):
+        """Get documents in collection"""
+        documents = get_documents_by_collection_id(collection_id)
+        document_ids = [document.document_id for document in documents]
 
-    return jsonify({
-        "message": f"Collection with id = {collection.id} was created",
-    }), 201
-
-
-@collections_api_bp.get("")
-def get_collections():
-    username = get_jwt_identity()
-    collections = get_collections_list(username)
-
-    if not collections:
-        return jsonify([]), 200
-
-    result = []
-
-    for collection in collections:
-        documents = [{
-            "document_id": document.document.id,
-            "document_name": document.document.name}
-            for document in collection.documents
-        ]
-
-        result.append({"collection_id": collection.id, "documents": documents})
-
-    return jsonify(result), 200
+        return {"document_ids": document_ids}, 200
 
 
-@collections_api_bp.get("/<int:collection_id>")
-@ensure_user_collection_exists
-def get_documents_by_collection(collection_id: int):
-    documents = get_documents_by_collection_id(collection_id)
-    document_ids = [document.document_id for document in documents]
+@api.route("/<int:collection_id>/statistics")
+@api.param("collection_id", "The collection identifier")
+class CollectionStatisticsResource(SecuredResource):
+    @api.doc(
+        description="Get TF-IDF statistics for a collection",
+        security="BearerAuth",
+        responses={
+            200: ("Success", statistics_response),
+            401: ("Missing JWT in headers or cookie", message_model),
+        }
+    )
+    @ensure_user_collection_exists
+    def get(self, collection_id):
+        """Get collection TF-IDF statistics"""
+        tf, idf = get_collection_stats(collection_id)
+        response = {"collection_id": collection_id, "tf": tf, "idf": idf}
 
-    return jsonify({"document_ids": document_ids}), 200
+        if not tf:
+            response["message"] = "No documents in collection were found"
 
-
-@collections_api_bp.get("/<int:collection_id>/statistics")
-@ensure_user_collection_exists
-def get_collection_statistics(collection_id: int):
-    tf, idf = get_collection_stats(collection_id)
-    response = {"collection_id": collection_id, "tf": tf, "idf": idf}
-
-    if not tf:
-        response["message"] = "No documents in collection were found"
-
-    return jsonify(response), 200
-
-
-@collections_api_bp.post("/<int:collection_id>/<int:document_id>")
-@ensure_user_collection_exists
-@ensure_user_document_exists
-@ensure_document_not_in_collection
-def add_document(collection_id: int, document_id: int):
-    add_document_to_collection(collection_id, document_id)
-    return jsonify({"message": "Document was added to collection"}), 201
+        return response, 200
 
 
-@collections_api_bp.delete("/<int:collection_id>/<int:document_id>")
-@ensure_user_collection_exists
-@ensure_user_document_exists
-@ensure_document_in_collection
-def delete_document(collection_id: int, document_id: int):
-    delete_document_from_collection(collection_id, document_id)
-    return jsonify({
-        "message": "Document was deleted from this collection"
-    }), 200
+@api.route("/<int:collection_id>/<int:document_id>")
+@api.param("collection_id", "The collection identifier")
+@api.param("document_id", "The document identifier")
+class CollectionDocumentResource(SecuredResource):
+    @api.doc(
+        description="Add a document to a collection",
+        security="BearerAuth",
+        responses={
+            201: ("Document added", message_model),
+            401: ("Missing JWT in headers or cookie", message_model),
+        }
+    )
+    @ensure_user_collection_exists
+    @ensure_user_document_exists
+    @ensure_document_not_in_collection
+    def post(self, collection_id, document_id):
+        """Add document to collection"""
+        add_document_to_collection(collection_id, document_id)
+        return {"message": "Document was added to collection"}, 201
+
+    @api.doc(
+        description="Remove a document from a collection",
+        security="BearerAuth",
+        responses={
+            200: ("Document removed", message_model),
+            401: ("Missing JWT in headers or cookie", message_model),
+        }
+    )
+    @ensure_user_collection_exists
+    @ensure_user_document_exists
+    @ensure_document_in_collection
+    def delete(self, collection_id, document_id):
+        """Remove document from collection"""
+        delete_document_from_collection(collection_id, document_id)
+        return {"message": "Document was deleted from this collection"}, 200
