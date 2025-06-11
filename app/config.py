@@ -35,7 +35,7 @@ class Config:
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     MEDIA_FOLDER = os.path.join(os.path.dirname(__file__), "media")
     JWT_SECRET_KEY = jwt_secret_key
-    JWT_TOKEN_LOCATION = "cookies"
+    JWT_TOKEN_LOCATION = ["headers", "cookies"]
     JWT_ACCESS_COOKIE_PATH = "/"
     JWT_REFRESH_COOKIE_PATH = "/api/users/refresh"
     JWT_COOKIE_CSRF_PROTECT = jwt_cookie_csrf_protect
