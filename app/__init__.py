@@ -48,6 +48,10 @@ def create_app():
     from app.users.models import UserModel
     from app.shared.common_models import DocumentCollectionModel
 
+    @app.route("/")
+    def index():
+        return redirect("/tfidf")
+
     api = Api(
         app,
         version="0.2.0",
@@ -61,11 +65,6 @@ def create_app():
     api.add_namespace(documents_ns, path="/api/documents")
     api.add_namespace(collections_ns, path="/api/collections")
     api.add_namespace(system_ns, path="/api/system")
-
-    @app.route("/")
-    def index():
-        return redirect("/tfidf")
-
     app.register_blueprint(tfidf_bp, url_prefix="/tfidf")
 
     return app
