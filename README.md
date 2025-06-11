@@ -10,11 +10,11 @@ basic interaction.
 ## Contents
 
 * [Project Structure](#-project-structure)
-* [Entities Involved](#-entities-involved)
+* [Entities Involved](#%EF%B8%8F-entities-involved)
 * [How to Run the App](#-how-to-run-the-app)
-* [Environment Variables](#-environment-variables)
+* [Environment Variables](#%EF%B8%8F-environment-variables)
 * [API Documentation](#-api-documentation)
-  * [API Endpoints](#-api-endpoints)
+  * [API Endpoints](#%EF%B8%8F-api-endpoints)
   * [Interactive API Docs](#-interactive-api-docs)
 * [App Version](#-app-version)
 * [Recent Changes](#-recent-changes)
