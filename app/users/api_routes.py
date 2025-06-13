@@ -38,10 +38,10 @@ class LoginResource(Resource):
 
         response = {"message": "Login was successful",
                     "access_token": result["access_token"]}
-        res = make_response(response, 201)
-        set_access_cookies(res, result["access_token"])
-        set_refresh_cookies(res, result["refresh_token"])
-        return res
+        response = make_response(response, 201)
+        set_access_cookies(response, result["access_token"])
+        set_refresh_cookies(response, result["refresh_token"])
+        return response
 
 
 @api.route("/register")
@@ -164,7 +164,7 @@ class RefreshResource(Resource):
         """Refresh the access token"""
         username = get_jwt_identity()
         tokens = generate_tokens(username)
-        response = api.make_response({
+        response = make_response({
             "message": "Access token was refreshed"
         }, 200)
         set_access_cookies(response, tokens["access_token"])

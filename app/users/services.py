@@ -5,9 +5,13 @@ from app.users.models import UserModel
 
 
 def register_user(username: str, password: str) -> None | UserModel:
-    if db.session.query(UserModel).filter_by(username=username).first():
+    if get_user_by_username(username):
         return None
 
+    return create_user(username, password)
+
+
+def create_user(username: str, password: str) -> UserModel:
     user = UserModel(username=username)
     user.set_password(password)
 
