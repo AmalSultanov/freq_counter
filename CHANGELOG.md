@@ -12,6 +12,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) 
 - `shared/` package to group reusable components and utilities
 - Migrations to support newly introduced entities
 - JWT-based authentication
+- Flask-Admin
 
 ### Changed
 - Structure of `media/`: folders inside are named after usernames
