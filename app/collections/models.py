@@ -17,6 +17,7 @@ class CollectionModel(db.Model):
 
     documents = db.relationship(
         "DocumentCollectionModel",
+        cascade="all, delete-orphan",
         back_populates="collection"
     )
 
