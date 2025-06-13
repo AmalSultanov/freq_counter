@@ -26,3 +26,7 @@ class DocumentCollectionModel(db.Model):
     def __repr__(self):
         keys = f"{self.document_id}, {self.collection_id}"
         return f"<DocumentCollectionModel: ({keys})>"
+
+    def __str__(self):
+        keys = self.document_id, self.collection_id
+        return f"document_id: {keys[0]}, collection_id: {keys[1]}"
