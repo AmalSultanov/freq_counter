@@ -7,13 +7,14 @@ from app.collections.api_models import (
 )
 from app.collections.decorators import (
     ensure_user_collection_exists, ensure_user_document_exists,
-    ensure_document_not_in_collection, ensure_document_in_collection
+    ensure_document_not_in_collection, ensure_document_in_collection,
+    check_collection_not_exists
 )
 from app.collections.namespace import api
 from app.collections.services import (
     get_collections_list, get_documents_by_collection_id, get_collection_stats,
     add_document_to_collection, delete_document_from_collection,
-    add_collection
+    add_collection, remove_collection, update_collection_name
 )
 
 
@@ -56,10 +57,12 @@ class CollectionListResource(SecuredResource):
         security="BearerAuth",
         responses={
             201: ("Collection created", message_model),
-            401: ("Missing JWT in headers or cookie", message_model)
+            401: ("Missing JWT in headers or cookie", message_model),
+            409: ("Collection with this name already exists", message_model)
         }
     )
     @api.expect(collection_input)
+    @check_collection_not_exists
     def post(self):
         """Create a new collection"""
         username = get_jwt_identity()
@@ -90,6 +93,43 @@ class CollectionDocumentsResource(SecuredResource):
 
         return {"document_ids": document_ids}, 200
 
+    @api.doc(
+        description="Update the name of particular collection",
+        security="BearerAuth",
+        responses={
+            200: ("Collection was removed", message_model),
+            401: ("Missing JWT in headers or cookie", message_model),
+            404: ("User does not have such collection", message_model),
+        }
+    )
+    @api.expect(collection_input)
+    @ensure_user_collection_exists
+    def patch(self, collection_id):
+        """Update collection name"""
+        username = get_jwt_identity()
+        collection_name = request.json.get("collection_name")
+        update_collection_name(username, collection_id, collection_name)
+
+        return {"message": f"Collection was updated"}, 201
+
+    @api.doc(
+        description="Delete a collection, documents in it will be "
+                    "unlinked from this collection but not deleted",
+        security="BearerAuth",
+        responses={
+            200: ("Collection was removed", message_model),
+            401: ("Missing JWT in headers or cookie", message_model),
+            404: ("User does not have such collection", message_model),
+        }
+    )
+    @ensure_user_collection_exists
+    def delete(self, collection_id):
+        """Delete collection"""
+        username = get_jwt_identity()
+        remove_collection(username, collection_id)
+
+        return {"message": "Collection was deleted"}, 200
+
 
 @api.route("/<int:collection_id>/statistics")
 @api.param("collection_id", "The collection identifier")
@@ -105,11 +145,16 @@ class CollectionStatisticsResource(SecuredResource):
     @ensure_user_collection_exists
     def get(self, collection_id):
         """Get collection TF-IDF statistics"""
-        tf, idf = get_collection_stats(collection_id)
-        response = {"collection_id": collection_id, "tf": tf, "idf": idf}
+        number_of_documents, tf, idf = get_collection_stats(collection_id)
+        response = {"collection_id": collection_id, "tf": tf}
 
-        if not tf:
+        if number_of_documents == 0:
             response["message"] = "No documents in collection were found"
+        elif number_of_documents == 1:
+            response["message"] = ("There is only one document in this "
+                                   "collection, IDF is unavailable")
+        else:
+            response["idf"] = idf
 
         return response, 200
 
@@ -124,6 +169,9 @@ class CollectionDocumentResource(SecuredResource):
         responses={
             201: ("Document added", message_model),
             401: ("Missing JWT in headers or cookie", message_model),
+            404: ("User does not have such collection or document",
+                  message_model),
+            409: ("Document already exists in this collection", message_model),
         }
     )
     @ensure_user_collection_exists
@@ -138,8 +186,11 @@ class CollectionDocumentResource(SecuredResource):
         description="Remove a document from a collection",
         security="BearerAuth",
         responses={
-            200: ("Document removed", message_model),
+            200: ("Document was removed", message_model),
             401: ("Missing JWT in headers or cookie", message_model),
+            404: ("User does not have such collection or document",
+                  message_model),
+            409: ("Document is not part of this collection", message_model),
         }
     )
     @ensure_user_collection_exists

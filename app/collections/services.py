@@ -26,7 +26,7 @@ def add_collection(username: str, collection_name: str) -> CollectionModel:
     return collection
 
 
-def user_collection_exists(collection_id: int, user: UserModel) -> bool:
+def user_collection_exists(user: UserModel, collection_id: int) -> bool:
     return (
         db.session.query(CollectionModel)
         .filter_by(id=collection_id, user_id=user.id)
@@ -34,7 +34,17 @@ def user_collection_exists(collection_id: int, user: UserModel) -> bool:
     ) is not None
 
 
-def user_document_exists(document_id: int, user: UserModel) -> bool:
+def user_collection_with_name_exists(
+    user: UserModel, collection_name: str
+) -> bool:
+    return (
+        db.session.query(CollectionModel)
+        .filter_by(name=collection_name, user_id=user.id)
+        .first()
+    ) is not None
+
+
+def user_document_exists(user: UserModel, document_id: int) -> bool:
     return is_user_document_present(document_id, user)
 
 
@@ -49,7 +59,20 @@ def document_in_collection_exists(
 
 
 def get_collection_by_id(collection_id: int) -> CollectionModel | None:
-    return db.session.query(CollectionModel).filter_by(id=collection_id).first()
+    return (
+        db.session.query(CollectionModel)
+        .filter_by(id=collection_id)
+        .first()
+    )
+
+
+def get_user_collection(username: str, collection_id: int) -> UserModel | None:
+    user = get_user_by_username(username)
+    return (
+        db.session.query(CollectionModel)
+        .filter_by(id=collection_id, user_id=user.id)
+        .first()
+    )
 
 
 def get_collections_list(username: str) -> list[CollectionModel]:
@@ -71,21 +94,29 @@ def get_documents_by_collection_id(collection_id: int) -> list[Row]:
 
 def get_collection_stats(
     collection_id: int
-) -> tuple[dict[str, float], dict[str, float]]:
+) -> tuple[int, dict[str, float], dict[str, float]]:
+    documents_in_collection = get_documents_in_collection(collection_id)
+    number_of_documents = len(documents_in_collection)
+
+    if number_of_documents == 0:
+        return 0, {}, {}
+
     all_text = get_collection_documents_text(collection_id)
     tokens = tokenize_text(all_text)
     total_words = len(tokens)
     word_counts = Counter(tokens)
 
-    documents_in_collection = get_documents_in_collection(collection_id)
     tf_dict = calculate_tf(word_counts, total_words)
-    idf_dict = calculate_idf(documents_in_collection)
-
     least_frequent_words = get_least_frequent_words(tf_dict)
     tf = {word: tf_dict[word] for word in least_frequent_words}
+
+    if number_of_documents == 1:
+        return 1, tf, {}
+
+    idf_dict = calculate_idf(documents_in_collection)
     idf = {word: idf_dict.get(word, 0.0) for word in least_frequent_words}
 
-    return tf, idf
+    return number_of_documents, tf, idf
 
 
 def get_collection_documents_text(collection_id: int) -> str:
@@ -133,3 +164,36 @@ def delete_document_from_collection(
 
         return link
     return None
+
+
+def update_collection_name(
+    username: str, collection_id: int, collection_name: str
+) -> None | CollectionModel:
+    user_collection = get_user_collection(username, collection_id)
+
+    if not user_collection:
+        return None
+
+    user_collection.name = collection_name
+    db.session.commit()
+
+    return user_collection
+
+
+def remove_collection(
+        username: str, collection_id: int
+) -> CollectionModel | None:
+    user = get_user_by_username(username)
+    collection = (
+        db.session.query(CollectionModel)
+        .filter_by(id=collection_id, user_id=user.id)
+        .first()
+    )
+
+    if not collection:
+        return None
+
+    db.session.delete(collection)
+    db.session.commit()
+
+    return collection
