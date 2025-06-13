@@ -8,6 +8,8 @@ load_dotenv()
 flask_port = os.getenv("FLASK_PORT")
 flask_debug = os.getenv("FLASK_DEBUG")
 flask_env = os.getenv("FLASK_ENV")
+flask_secret_key = os.getenv("FLASK_SECRET_KEY")
+flask_admin_secret_key = os.getenv("FLASK_ADMIN_SECRET_KEY")
 
 jwt_secret_key = os.getenv("JWT_SECRET_KEY")
 jwt_cookie_csrf_protect = os.getenv("JWT_COOKIE_CSRF_PROTECT")
@@ -28,6 +30,8 @@ postgres_db = os.getenv("POSTGRES_DB")
 
 class Config:
     DEBUG = flask_debug
+    SECRET_KEY = flask_secret_key
+    ADMIN_SECRET_KEY = flask_admin_secret_key
     SQLALCHEMY_DATABASE_URI = (
         f"postgresql://{postgres_user}:{postgres_password}"
         f"@{postgres_host}:{postgres_port}/{postgres_db}"

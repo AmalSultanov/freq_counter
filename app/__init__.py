@@ -6,6 +6,8 @@ from flask_jwt_extended import JWTManager
 from flask_migrate import Migrate
 from flask_restx import Api
 
+from app.admin import admin, views
+from app.admin.routes import admin_bp
 from app.collections import api_routes
 from app.collections.namespace import api as collections_ns
 from app.config import config_by_name, flask_env
@@ -40,6 +42,7 @@ def create_app():
     db.init_app(app)
     Migrate(app, db)
 
+    admin.init_app(app)
     bcrypt.init_app(app)
     jwt.init_app(app)
 
@@ -66,6 +69,8 @@ def create_app():
     api.add_namespace(documents_ns, path="/api/documents")
     api.add_namespace(collections_ns, path="/api/collections")
     api.add_namespace(system_ns, path="/api/system")
+
     app.register_blueprint(tfidf_bp, url_prefix="/tfidf")
+    app.register_blueprint(admin_bp, url_prefix="/admin")
 
     return app
