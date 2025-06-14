@@ -163,6 +163,8 @@ cython_debug/
 .idea/
 .DS_Store
 app/media/
+api_client/*
+!api_client/swagger.yaml
 
 ### Flask template
 instance/*
