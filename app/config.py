@@ -50,6 +50,7 @@ class Config:
     JWT_REFRESH_TOKEN_EXPIRES = timedelta(
         days=jwt_refresh_token_expires_days
     )
+    MAX_CONTENT_LENGTH = 3 * 1024 * 1024
 
 
 class DevelopmentConfig(Config):
