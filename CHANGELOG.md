@@ -5,7 +5,30 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this project adheres to [Semantic Versioning](https://semver.org).
 
 ---
-## 0.2.0 - (2025-06-10)
+
+## 1.2.0 - (2025-06-15)
+
+### Added
+- Caching of TF-IDF results
+- API client generation ability
+- Endpoint for document content encoding using Huffman coding
+
+### Fixed
+- Inconsistent varchar constraints on character fields, now they have limited length
+
+### Feedback
+- ### What you liked
+  - start here...
+  
+- ### What problems you faced with during the installation
+  - start here...
+  
+- ### Your recommendations
+  - start here...
+
+---
+
+## 1.1.0 - (2025-06-10)
 
 ### Added
 - New core entities: `documents/`, `collections/`, and `users/` with corresponding endpoints, models and services to support API development
@@ -22,18 +45,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) 
 ### Fixed
 - Duplicate documents now cannot be uploaded
 
-### Feedback
-- ### What you liked
-  - start here...
-  
-- ### What problems you faced with during the installation
-  - start here...
-  
-- ### Your recommendations
-  - start here...
-
 ---
-## 0.1.1 - (2025-05-27)
+
+## 1.0.0 - (2025-05-27)
 
 ### Added
 - `tfidf/` package with endpoints and services for web interface
