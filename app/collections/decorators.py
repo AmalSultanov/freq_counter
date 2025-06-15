@@ -3,7 +3,7 @@ from functools import wraps
 from flask import request
 from flask_jwt_extended import get_jwt_identity
 
-from app.collections.services import (
+from app.collections.services.checks import (
     user_collection_exists, user_document_exists,
     document_in_collection_exists, user_collection_with_name_exists
 )

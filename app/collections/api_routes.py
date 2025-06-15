@@ -11,8 +11,10 @@ from app.collections.decorators import (
     check_collection_not_exists
 )
 from app.collections.namespace import api
-from app.collections.services import (
-    get_collections_list, get_documents_by_collection_id, get_collection_stats,
+from app.collections.selectors import (
+    get_collections_list, get_documents_by_collection_id, get_collection_stats
+)
+from app.collections.services.crud import (
     add_document_to_collection, delete_document_from_collection,
     add_collection, remove_collection, update_collection_name
 )
@@ -48,7 +50,8 @@ class CollectionListResource(SecuredResource):
                 for document in collection.documents
             ]
             result.append(
-                {"collection_id": collection.id, "documents": documents})
+                {"collection_id": collection.id, "documents": documents}
+            )
 
         return result, 200
 
