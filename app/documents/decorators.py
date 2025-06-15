@@ -13,7 +13,7 @@ def ensure_user_document_exists(func):
         username = get_jwt_identity()
         user = get_user_by_username(username)
 
-        if not user_has_document(document_id, user):
+        if not user_has_document(user, document_id):
             return {"message": "This user does not have such document"}, 404
         return func(*args, **kwargs)
     return wrapper
