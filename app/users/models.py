@@ -9,9 +9,9 @@ class UserModel(db.Model):
     __tablename__ = "users"
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    username = db.Column(db.String, unique=True, nullable=False)
-    password = db.Column(db.String, nullable=False)
-    is_admin = db.Column(db.Boolean, default=False)
+    username = db.Column(db.String(100), unique=True, nullable=False)
+    password = db.Column(db.String(60), nullable=False)
+    is_admin = db.Column(db.Boolean, default=False, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     documents = db.relationship(
