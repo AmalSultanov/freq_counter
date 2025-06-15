@@ -21,6 +21,9 @@ jwt_refresh_token_expires_days = int(os.getenv(
     "JWT_REFRESH_TOKEN_EXPIRES_DAYS"
 ))
 
+redis_host = os.getenv("CACHE_REDIS_HOST")
+redis_port = os.getenv("CACHE_REDIS_PORT")
+
 postgres_user = os.getenv("POSTGRES_USER")
 postgres_password = os.getenv("POSTGRES_PASSWORD")
 postgres_host = os.getenv("POSTGRES_HOST")
@@ -51,6 +54,10 @@ class Config:
         days=jwt_refresh_token_expires_days
     )
     MAX_CONTENT_LENGTH = 3 * 1024 * 1024
+    CACHE_TYPE = "RedisCache"
+    CACHE_REDIS_HOST = redis_host
+    CACHE_REDIS_PORT = redis_port
+    CACHE_KEY_PREFIX = ""
 
 
 class DevelopmentConfig(Config):
