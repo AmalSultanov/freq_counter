@@ -7,7 +7,7 @@ class CollectionModel(db.Model):
     __tablename__ = "collections"
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    name = db.Column(db.String(256), nullable=False)
+    name = db.Column(db.String(100), nullable=False)
     user_id = db.Column(
         db.Integer,
         db.ForeignKey("users.id", ondelete="CASCADE"),

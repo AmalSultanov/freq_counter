@@ -7,7 +7,7 @@ class FileMetricModel(db.Model):
     __tablename__ = "file_metrics"
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    filename = db.Column(db.String(256), nullable=False)
+    filename = db.Column(db.String(100), nullable=False)
     word_count = db.Column(db.Integer, nullable=False)
     file_size = db.Column(db.Integer, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
