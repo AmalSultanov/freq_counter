@@ -2,7 +2,7 @@ from functools import wraps
 
 from flask_jwt_extended import get_jwt_identity
 
-from app.documents.services import user_has_document
+from app.documents.services.checks import user_has_document
 from app.users.services import get_user_by_username
 
 
