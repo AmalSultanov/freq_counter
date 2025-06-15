@@ -1,8 +1,6 @@
 import os
 
 from flask import Flask, redirect
-from flask_bcrypt import Bcrypt
-from flask_jwt_extended import JWTManager
 from flask_migrate import Migrate
 from flask_restx import Api
 
@@ -14,14 +12,12 @@ from app.config import config_by_name, flask_env
 from app.database import db
 from app.documents import api_routes
 from app.documents.namespace import api as documents_ns
+from app.extensions import bcrypt, jwt, cache
 from app.system import api_routes
 from app.system.namespace import api as system_ns
 from app.tfidf.routes import tfidf_bp
 from app.users import api_routes
 from app.users.namespace import api as users_ns
-
-bcrypt = Bcrypt()
-jwt = JWTManager()
 
 authorizations = {
     'BearerAuth': {
@@ -45,6 +41,7 @@ def create_app():
     admin.init_app(app)
     bcrypt.init_app(app)
     jwt.init_app(app)
+    cache.init_app(app)
 
     from app.system.models import FileMetricModel
     from app.collections.models import CollectionModel
