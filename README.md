@@ -16,6 +16,7 @@ basic interaction.
 * [API Documentation](#-api-documentation)
   * [API Endpoints](#%EF%B8%8F-api-endpoints)
   * [Interactive API Docs](#-interactive-api-docs)
+* [Generating a Python API Client](#-generating-a-python-api-client)
 * [App Version](#-app-version)
 * [Recent Changes](#-recent-changes)
 * [References](#-references)
@@ -27,9 +28,20 @@ basic interaction.
 ```
 freq_counter/
 │
+├── api_client/                   # Directory for API client library generation
+│   └── swagger.yaml              # OpenAPI specification
+│
 ├── app/                          # Main Flask application package
 │   │
+│   ├── admin/                    # Administering using Flask-Admin
+│   │   ├── views/                # Views to display admin page, models, etc
+│   │   ├── __init__.py                
+│   │   ├── decorators.py         # Decorators for validating access rights
+│   │   ├── routes.py             # Auth and admin dashboard routes
+│   │   └── services.py           # Business logic 
+│   │
 │   ├── collections/              # Management of document groupings
+│   │   ├── services/             # Existence checks, CRUD, etc.               
 │   │   ├── __init__.py                
 │   │   ├── api_models.py         # API schema definitions
 │   │   ├── api_routes.py         # JSON API endpoints 
@@ -37,9 +49,10 @@ freq_counter/
 │   │   ├── models.py             # SQLAlchemy models
 │   │   ├── namespace.py          # Namespace registration, like a blueprint
 │   │   ├── routes.py             # Placeholder for future web views
-│   │   └── services.py           # Business logic 
+│   │   └── selectors.py          # Business logic (getter functions) 
 │   │
 │   ├── documents/                # Handles document upload, processing, and metadata
+│   │   ├── services/             # Existence checks, CRUD, etc.
 │   │   ├── __init__.py
 │   │   ├── api_models.py         # API schema definitions 
 │   │   ├── api_routes.py         # JSON API endpoints 
@@ -48,7 +61,7 @@ freq_counter/
 │   │   ├── models.py             # SQLAlchemy models
 │   │   ├── namespace.py          # Namespace registration, like a blueprint
 │   │   ├── routes.py             # Placeholder for future web views
-│   │   └── services.py           # Business logic 
+│   │   └── selectors.py          # Business logic (getter functions) 
 │   │
 │   ├── media/                    # Directory for storing uploaded text documents
 │   │
@@ -85,6 +98,7 @@ freq_counter/
 │   ├── __init__.py               # Flask app factory which creates and configures the app
 │   ├── config.py                 # Config classes 
 │   ├── database.py               # SQLAlchemy engine initialization
+│   ├── extensions.py             # Declaration of JWTManager, Cache, etc.
 │   └── version.py                # App version info
 │
 ├── migrations/                   # Alembic migrations
@@ -93,7 +107,7 @@ freq_counter/
 ├── .env                          
 ├── .env.example                  # Sample .env
 ├── .gitignore                    
-├── CHANGELOG.md                  
+├── CHANGELOG.md                  # Leave your feedback here in designated section
 ├── docker-compose.yml            
 ├── Dockerfile                     
 ├── README.md                     
@@ -105,44 +119,7 @@ freq_counter/
 
 ## 🖼️ Entities Involved
 
-<img width="1018" alt="Screenshot 2025-06-09 at 23 06 36" src="https://github.com/user-attachments/assets/6e8e9039-23c9-4d4c-be04-e14a6ce6442b" />
 
-### 📄 Documents
-
-- `id`: Primary key
-- `name`: Original file name
-- `contents`: Text content of the file
-- `content_hash`: SHA256 hash of contents (to detect duplicates)
-- `user_id`: Foreign key to `Users` (owner of the document)
-- `created_at`: Timestamp of upload
-
-### 👤 Users
-
-- `id`: Primary key
-- `username`: Unique username
-- `password`: Hashed password
-- `created_at`: Timestamp of registration
-
-### 🔗 Documents_Collections (Association Table)
-
-- `document_id`: Foreign key to `Documents`
-- `collection_id`: Foreign key to `Collections`
-- `created_at`: Timestamp when the document was added to the collection
-
-### 🗂️ Collections
-
-- `id`: Primary key
-- `name`: Name of the collection
-- `user_id`: Foreign key to `Users` (owner of the collection)
-- `created_at`: Timestamp of creation
-
-### 📊 File_Metrics
-
-- `id`: Primary key
-- `filename`: Name of the uploaded file
-- `word_count`: Total number of words
-- `file_size`: File size in bytes
-- `created_at`: Timestamp of metric entry
 
 ---
 
@@ -188,6 +165,8 @@ The application uses the following environment variables (check `.env.example`):
 * `JWT_COOKIE_SECURE` - Send cookies only over HTTPS (`True` for production, `False` for development)
 * `JWT_ACCESS_TOKEN_EXPIRES_MINUTES` - Access token expiration time in minutes (e.g., `15`)
 * `JWT_REFRESH_TOKEN_EXPIRES_DAYS` - Refresh token expiration time in days (e.g., `30`)
+* `CACHE_REDIS_HOST` - Host for Redis (e.g, `localhost` or a Docker Compose service name)
+* `CACHE_REDIS_PORT` - Port number for Redis to run on
 * `POSTGRES_USER` - PostgreSQL username (e.g., `postgres`)
 * `POSTGRES_PASSWORD`- PostgreSQL password
 * `POSTGRES_HOST` - Host for PostgreSQL (e.g., `localhost` or a Docker Compose service name)
@@ -207,9 +186,11 @@ This backend provides the following main API groups:
 - `/users/*` - User registration, login, and token handling  
 - `/system/*` - Runtime metrics and status  
 - `/tfidf/*` - TF-IDF values calculations with a web interface
-> ⚠️ Note: The web interface currently supports only a single document and exclusively TF analysis. Use the API for multi-document collection support with full TF-IDF statistics.
+> ⚠️ Note: The web interface currently supports only a single document and exclusively TF analysis (still under development). Use the API for multi-document collection support with full TF-IDF statistics.
 
 ### 🧩️ API Endpoints
+
+### Documents
 
 | Method   | URL                                          | Description                                                                                                        | Auth Required |
 |----------|----------------------------------------------|--------------------------------------------------------------------------------------------------------------------|:-------------:|
@@ -217,28 +198,43 @@ This backend provides the following main API groups:
 | `POST`   | `/documents`                                 | Upload a new `.txt` document.                                                                                      |       ✅       |
 | `GET`    | `/documents/<document_id>`                   | Fetch contents of a specific document.                                                                             |       ✅       |
 | `GET`    | `/documents/<document_id>/statistics`        | Get term frequency (TF) if the document is not in any collection; otherwise, return full TF-IDF stats.             |       ✅       |
+| `GET`    | `/documents/<document_id>/huffman`           | Fetch contents of a specific document and encode it into Huffman coded form.                                       |       ✅       |
 | `DELETE` | `/documents/<document_id>`                   | Delete a specific document.                                                                                        |       ✅       |
+
+
+### Collections
+
+| Method   | URL                                          | Description                                                                                                        | Auth Required |
+|----------|----------------------------------------------|--------------------------------------------------------------------------------------------------------------------|:-------------:|
 | `GET`    | `/collections`                               | Get collections with documents in them for the current user.                                                       |       ✅       |
 | `POST`   | `/collections`                               | Create a collection.                                                                                               |       ✅       |
 | `GET`    | `/collections/<collection_id>`               | Fetch documents from specific collection.                                                                          |       ✅       |
 | `GET`    | `/collections/<collection_id>/statistics`    | Get TF-IDF statistics for the collection.                                                                          |       ✅       |
 | `POST`   | `/collections/<collection_id>/<document_id>` | Add a document to the collection.                                                                                  |       ✅       |
 | `DELETE` | `/collections/<collection_id>/<document_id>` | Remove specific document from collection.                                                                          |       ✅       |
+
+### Users
+
+| Method   | URL                                          | Description                                                                                                        | Auth Required |
+|----------|----------------------------------------------|--------------------------------------------------------------------------------------------------------------------|:-------------:|
 | `POST`   | `/users/login`                               | Authenticate a user.                                                                                               |       ❌       |
 | `POST`   | `/users/register`                            | Register a new user.                                                                                               |       ❌       |
 | `GET`    | `/users/logout`                              | Logout the current user.                                                                                           |       ✅       |
 | `PATCH`  | `/users/<user_id>`                           | Update the password for the authenticated user.                                                                    |       ✅       |
 | `DELETE` | `/users/<user_id>`                           | Delete the authenticated user and clear cookies.                                                                   |       ✅       |
 | `POST`   | `/users/refresh`                             | Use refresh token to obtain a new access token.                                                                    |       ✅       |
+
+### System
+
+| Method   | URL                                          | Description                                                                                                        | Auth Required |
+|----------|----------------------------------------------|--------------------------------------------------------------------------------------------------------------------|:-------------:|
 | `GET`    | `/system/status`                             | Check if the system is running.                                                                                    |       ❌       |
 | `GET`    | `/system/metrics`                            | Retrieve system usage metrics.                                                                                     |       ❌       |
 | `GET`    | `/system/version`                            | Get the current version of the system.                                                                             |       ❌       |
-| `GET`    | `/tfidf`                                     | Get the HTML template for uploading a single document.                                                             |       ❌       |
-| `POST`   | `/tfidf`                                     | Retrieve an HTML page displaying a table of TF values only, as the document is not part of any collection for now. |       ❌       |
 
 ### 🧪 Interactive API Docs
 
-You can explore and test all API endpoints directly via Swagger UI:
+Explore and test all API endpoints directly via Swagger UI:
 
 🔗 [Swagger UI Documentation](http://37.9.53.217/api/docs)
 
@@ -247,6 +243,82 @@ This interactive interface allows you to:
 - See input and output schemas
 - Authenticate and test requests
 
+> Do not forget to click `Authorize` and paste the access token in form `Bearer access_token` right after you register an account or log into existing one. 
+
+---
+
+## 🛠️ Generating a Python API Client
+
+You can generate a Python API client using the [`openapi-python-client`](https://github.com/openapi-generators/openapi-python-client) generator, based on the OpenAPI specification located at `api_client/swagger.yaml`.
+> ✅ This tool is already installed as part of the project dependencies.
+
+### 📤️ Generate the Client
+
+Run the following command from the project root to generate or update the API client package:
+
+```bash
+openapi-python-client generate --path api_client/swagger.yaml --output-path api_client --overwrite
+```
+
+This will generate the client code in the `api_client` directory.
+
+### 🧪 Example Usage
+
+Create a python file (e.g. `main.py`) and a random text file (e.g. `test.txt`) inside `api_client` directory, at the same level as the `swagger.yaml`. The `main.py` script below sends a request to upload a document and prints the response:
+
+```python 
+import word_frequency_counter_tf_idf_analyzer_api_client.api.documents.post_documents_list_resource as upload
+from word_frequency_counter_tf_idf_analyzer_api_client.models.post_documents_list_resource_body import PostDocumentsListResourceBody
+from word_frequency_counter_tf_idf_analyzer_api_client.types import File
+from word_frequency_counter_tf_idf_analyzer_api_client import AuthenticatedClient
+
+
+def print_result(filename):
+    client = AuthenticatedClient(
+        base_url="http://127.0.0.1",  # Replace with your actual server address
+        token="token",                # Replace with your valid access token
+    )
+
+    with open(filename, "rb") as f:
+        file_data = File(payload=f, file_name=filename, mime_type="text/plain")
+        data = PostDocumentsListResourceBody(file=file_data)
+        result = upload.sync(client=client, body=data)
+        print(result)
+
+
+if __name__ == "__main__":
+    print_result("test.txt")
+```
+
+> 🔐 You can obtain your token by registering or logging in through the Swagger UI Documentation.
+
+Sample output responses of this script:
+
+#### ✅ Successful Upload
+```bash
+Message(message='Document with id = 4 was uploaded', additional_properties={})
+```
+
+#### ⚠️ Duplicate Document    
+```bash
+Message(message='Document with this content was already uploaded earlier', additional_properties={})
+```
+
+#### ⚠️ Empty File Submission
+```bash
+Message(message='Uploading empty files is not allowed', additional_properties={})
+```
+
+#### 🚫 File Too Large   
+```bash
+Message(message='The data value transmitted exceeds the capacity limit.', additional_properties={})
+```
+
+#### ❌ Invalid File Type
+```bash
+Message(message='Only .txt files are allowed', additional_properties={})
+```
+
 ---
 
 ## 🩹 App Version
@@ -254,7 +326,7 @@ This interactive interface allows you to:
 The current app version is defined in `app/version.py`:
 
 ```python
-__version__ = "0.2.0"
+__version__ = "1.2.0"
 ```
 
 ---
