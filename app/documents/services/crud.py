@@ -20,7 +20,7 @@ from app.users.services import get_user_by_username
 def add_document(file: FileStorage, username: str) -> DocumentModel:
     file_path, contents = save_uploaded_file(file, username)
     user = get_user_by_username(username)
-    content_hash = compute_content_hash(contents)
+    content_hash = compute_content_hash(contents.lower())
 
     if is_duplicate_document(user.id, content_hash):
         message = "Document with this content was already uploaded earlier"
@@ -90,39 +90,6 @@ def fetch_document_contents(document_id: int) -> Row | None:
     return document if document else None
 
 
-def get_collections_idf_data(
-    document_id: int, tf: dict[str, float]
-) -> list[dict[str, int | dict[str, float]]] | None:
-    collections = get_collections_for_document(document_id)
-
-    if not collections:
-        return None
-
-    collections_data = []
-
-    for collection_id in collections:
-        documents_in_collection = get_documents_in_collection(collection_id)
-        idf = calculate_idf(documents_in_collection)
-        tfidf = {
-            "collection_id": collection_id,
-            "tf": tf,
-            "idf": {word: idf.get(word, 0.0) for word in tf}
-        }
-        collections_data.append(tfidf)
-
-    return collections_data
-
-
-def get_collections_for_document(document_id: int) -> list[int]:
-    collection_ids = (
-        db.session.query(DocumentCollectionModel.collection_id)
-        .filter(DocumentCollectionModel.document_id == document_id)
-        .all()
-    )
-
-    return [collection_id.collection_id for collection_id in collection_ids]
-
-
 def get_document_tf(document_id: int) -> dict[str, float] | None:
     document_contents = (
         db.session.query(DocumentModel.contents)
@@ -142,6 +109,49 @@ def get_document_tf(document_id: int) -> dict[str, float] | None:
     return None
 
 
+def get_collections_idf_data(
+    document_id: int, tf: dict[str, float]
+) -> list[dict[str, int | dict[str, float]]] | None:
+    collections = get_collections_for_document(document_id)
+
+    if not collections:
+        return None
+
+    collections_data = []
+
+    for collection_id in collections:
+        documents_in_collection = get_documents_in_collection(collection_id)
+        number_of_documents = len(documents_in_collection)
+
+        if number_of_documents == 1:
+            collections_data.append({
+                "collection_id": collection_id,
+                "tf": tf,
+                "message": "This document is the only one in this "
+                           "collection, IDF is unavailable"
+            })
+            continue
+
+        idf = calculate_idf(documents_in_collection)
+        collections_data.append({
+            "collection_id": collection_id,
+            "tf": tf,
+            "idf": {word: idf.get(word, 0.0) for word in tf}
+        })
+
+    return collections_data
+
+
+def get_collections_for_document(document_id: int) -> list[int]:
+    collection_ids = (
+        db.session.query(DocumentCollectionModel.collection_id)
+        .filter(DocumentCollectionModel.document_id == document_id)
+        .all()
+    )
+
+    return [collection_id.collection_id for collection_id in collection_ids]
+
+
 def get_documents_in_collection(collection_id: int) -> list[tuple[int, str]]:
     documents = (
         db.session.query(DocumentModel.id, DocumentModel.contents)
@@ -154,7 +164,7 @@ def get_documents_in_collection(collection_id: int) -> list[tuple[int, str]]:
     return documents
 
 
-def remove_document(document_id: int, username: str) -> DocumentModel | None:
+def remove_document(username: str, document_id: int) -> DocumentModel | None:
     user = get_user_by_username(username)
     document = (
         db.session.query(DocumentModel)
@@ -173,7 +183,7 @@ def remove_document(document_id: int, username: str) -> DocumentModel | None:
     return document
 
 
-def user_has_document(document_id: int, user: UserModel) -> bool:
+def user_has_document(user: UserModel, document_id: int) -> bool:
     return (
         db.session.query(DocumentModel)
         .filter(
