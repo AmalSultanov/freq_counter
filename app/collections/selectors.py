@@ -94,8 +94,7 @@ def get_collection_idf_cached(
 
     documents_in_collection = get_documents_in_collection(collection_id)
     idf_dict = calculate_idf(documents_in_collection)
-    print(idf_dict)
-    print({word: idf_dict.get(word, 0.0) for word in words})
+
     cache.set(cache_key, idf_dict, timeout=6 * 3600)
 
     return {word: idf_dict.get(word, 0.0) for word in words}
