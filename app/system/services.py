@@ -3,14 +3,14 @@ from datetime import date
 from sqlalchemy import func
 
 from app.database import db
-from app.system.models import FileMetricModel
+from app.system.models import DocumentMetricModel
 
 
-def create_file_metric(
-    filename: str, word_count: int, file_size: int
-) -> FileMetricModel:
-    metric = FileMetricModel(
-        filename=filename, word_count=word_count, file_size=file_size
+def create_document_metrics(
+    document_id: int, word_count: int, size: int
+) -> DocumentMetricModel:
+    metric = DocumentMetricModel(
+        document_id=document_id, word_count=word_count, size=size
     )
 
     db.session.add(metric)
@@ -23,7 +23,7 @@ def get_uploads_count() -> int:
     today = date.today()
     result = (
         db.session.query(func.count().label("uploads_count"))
-        .filter(func.date(FileMetricModel.created_at) == today)
+        .filter(func.date(DocumentMetricModel.created_at) == today)
         .scalar()
     )
 
@@ -32,8 +32,8 @@ def get_uploads_count() -> int:
 
 def get_largest_file() -> int:
     largest_size = (
-        db.session.query(FileMetricModel.file_size)
-        .order_by(FileMetricModel.file_size.desc())
+        db.session.query(DocumentMetricModel.size)
+        .order_by(DocumentMetricModel.size.desc())
         .limit(1)
         .scalar()
     )
