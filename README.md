@@ -16,7 +16,7 @@ basic interaction.
 * [API Documentation](#-api-documentation)
   * [API Endpoints](#%EF%B8%8F-api-endpoints)
   * [Interactive API Docs](#-interactive-api-docs)
-* [Generating a Python API Client](#-generating-a-python-api-client)
+* [Generating a Python API Client](#%EF%B8%8F-generating-a-python-api-client)
 * [App Version](#-app-version)
 * [Recent Changes](#-recent-changes)
 * [References](#-references)
@@ -119,7 +119,7 @@ freq_counter/
 
 ## 🖼️ Entities Involved
 
-
+<img width="1405" alt="db" src="https://github.com/user-attachments/assets/76abb22a-9ad4-4bfe-a01f-03b9e1a0868b" />
 
 ---
 
