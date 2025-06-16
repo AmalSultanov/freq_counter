@@ -1,0 +1,862 @@
+openapi: 3.0.1
+info:
+  title: "Word Frequency Counter: TF-IDF Analyzer API"
+  description: API for TF-IDF calculations on documents and collections managed by
+    users. Also includes system-level endpoints.
+  version: 1.2.0
+servers:
+- url: /
+tags:
+- name: Users
+  description: User authentication and management
+- name: Documents
+  description: Operations over documents available for current user
+- name: Collections
+  description: Manage document collections
+- name: System
+  description: System status and metrics endpoints
+paths:
+  /api/collections:
+    get:
+      tags:
+      - Collections
+      summary: List current user's collections with documents in them
+      description: Get list of user collections and documents in them
+      operationId: get_collection_list_resource
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Collection'
+        "401":
+          description: Missing JWT in headers or cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+      security:
+      - BearerAuth: []
+    post:
+      tags:
+      - Collections
+      summary: Create a new collection
+      description: Create a new collection
+      operationId: post_collection_list_resource
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CollectionInput'
+        required: true
+      responses:
+        "201":
+          description: Collection created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+        "401":
+          description: Missing JWT in headers or cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+        "409":
+          description: Collection with this name already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+      security:
+      - BearerAuth: []
+      x-codegen-request-body-name: payload
+  /api/collections/{collection_id}:
+    get:
+      tags:
+      - Collections
+      summary: Get documents in collection
+      description: Get document IDs in a collection
+      operationId: get_collection_documents_resource
+      parameters:
+      - name: collection_id
+        in: path
+        description: The collection identifier
+        required: true
+        schema:
+          type: integer
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: integer
+        "401":
+          description: Missing JWT in headers or cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+      security:
+      - BearerAuth: []
+    delete:
+      tags:
+      - Collections
+      summary: Delete collection
+      description: "Delete a collection, documents in it will be unlinked from this\
+        \ collection but not deleted"
+      operationId: delete_collection_documents_resource
+      parameters:
+      - name: collection_id
+        in: path
+        description: The collection identifier
+        required: true
+        schema:
+          type: integer
+      responses:
+        "200":
+          description: Collection was removed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+        "401":
+          description: Missing JWT in headers or cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+        "404":
+          description: User does not have such collection
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+      security:
+      - BearerAuth: []
+    patch:
+      tags:
+      - Collections
+      summary: Update collection name
+      description: Update the name of particular collection
+      operationId: patch_collection_documents_resource
+      parameters:
+      - name: collection_id
+        in: path
+        description: The collection identifier
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CollectionInput'
+        required: true
+      responses:
+        "200":
+          description: Collection was removed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+        "401":
+          description: Missing JWT in headers or cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+        "404":
+          description: User does not have such collection
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+      security:
+      - BearerAuth: []
+      x-codegen-request-body-name: payload
+  /api/collections/{collection_id}/statistics:
+    get:
+      tags:
+      - Collections
+      summary: Get collection TF-IDF statistics
+      description: Get TF-IDF statistics for a collection
+      operationId: get_collection_statistics_resource
+      parameters:
+      - name: collection_id
+        in: path
+        description: The collection identifier
+        required: true
+        schema:
+          type: integer
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CollectionStatistics'
+        "401":
+          description: Missing JWT in headers or cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+      security:
+      - BearerAuth: []
+  /api/collections/{collection_id}/{document_id}:
+    post:
+      tags:
+      - Collections
+      summary: Add document to collection
+      description: Add a document to a collection
+      operationId: post_collection_document_resource
+      parameters:
+      - name: document_id
+        in: path
+        description: The document identifier
+        required: true
+        schema:
+          type: integer
+      - name: collection_id
+        in: path
+        description: The collection identifier
+        required: true
+        schema:
+          type: integer
+      responses:
+        "201":
+          description: Document added
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+        "401":
+          description: Missing JWT in headers or cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+        "404":
+          description: User does not have such collection or document
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+        "409":
+          description: Document already exists in this collection
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+      security:
+      - BearerAuth: []
+    delete:
+      tags:
+      - Collections
+      summary: Remove document from collection
+      description: Remove a document from a collection
+      operationId: delete_collection_document_resource
+      parameters:
+      - name: document_id
+        in: path
+        description: The document identifier
+        required: true
+        schema:
+          type: integer
+      - name: collection_id
+        in: path
+        description: The collection identifier
+        required: true
+        schema:
+          type: integer
+      responses:
+        "200":
+          description: Document was removed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+        "401":
+          description: Missing JWT in headers or cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+        "404":
+          description: User does not have such collection or document
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+        "409":
+          description: Document is not part of this collection
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+      security:
+      - BearerAuth: []
+  /api/documents:
+    get:
+      tags:
+      - Documents
+      summary: List documents for the current user
+      description: Get all documents for the current user
+      operationId: get_documents_list_resource
+      responses:
+        "200":
+          description: Documents were fetched
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Document'
+        "401":
+          description: Missing JWT in headers or cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+      security:
+      - BearerAuth: []
+    post:
+      tags:
+      - Documents
+      summary: Upload a document
+      description: Upload a new .txt document. The size of it should not exceed 3
+        MB
+      operationId: post_documents_list_resource
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              required:
+              - file
+              type: object
+              properties:
+                file:
+                  type: string
+                  description: A .txt file to upload (max size is 3 MB)
+                  format: binary
+        required: true
+      responses:
+        "201":
+          description: Document was uploaded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+        "400":
+          description: Document is empty
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+        "401":
+          description: Missing JWT in headers or cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+        "409":
+          description: Duplicate document is not allowed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+        "413":
+          description: Document is too large
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+      security:
+      - BearerAuth: []
+  /api/documents/{document_id}:
+    get:
+      tags:
+      - Documents
+      summary: Get document contents
+      description: Fetch document contents
+      operationId: get_document_contents_resource
+      parameters:
+      - name: document_id
+        in: path
+        description: The document identifier
+        required: true
+        schema:
+          type: integer
+      responses:
+        "200":
+          description: Document was found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DocumentContent'
+        "401":
+          description: Missing JWT in headers or cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+        "404":
+          description: User does not have this document
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+      security:
+      - BearerAuth: []
+    delete:
+      tags:
+      - Documents
+      summary: Delete a document
+      description: Delete a document by ID
+      operationId: delete_document_contents_resource
+      parameters:
+      - name: document_id
+        in: path
+        description: The document identifier
+        required: true
+        schema:
+          type: integer
+      responses:
+        "200":
+          description: Document deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+        "401":
+          description: Missing JWT in headers or cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+        "404":
+          description: User does not have this document
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+      security:
+      - BearerAuth: []
+  /api/documents/{document_id}/huffman:
+    get:
+      tags:
+      - Documents
+      summary: Get document contents in Huffman coding form
+      description: Fetch document contents and encode into Huffman coding form
+      operationId: get_document_contents_huffman_encoded_resource
+      parameters:
+      - name: document_id
+        in: path
+        description: The document identifier
+        required: true
+        schema:
+          type: integer
+      responses:
+        "200":
+          description: Document was encoded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HuffmanEncodedDocumentContent'
+        "401":
+          description: Missing JWT in headers or cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+        "404":
+          description: User does not have this document
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+      security:
+      - BearerAuth: []
+  /api/documents/{document_id}/statistics:
+    get:
+      tags:
+      - Documents
+      summary: Get TF-IDF statistics
+      description: "Get TF-IDF statistics for a document if it belongs to any collection,\
+        \ if not, get only TF stats with message that document should be in at least\
+        \ 1 collection to get IDF values"
+      operationId: get_document_statistics_resource
+      parameters:
+      - name: document_id
+        in: path
+        description: The document identifier
+        required: true
+        schema:
+          type: integer
+      responses:
+        "200":
+          description: Document was found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DocumentStatistics'
+        "401":
+          description: Missing JWT in headers or cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+        "404":
+          description: User does not have this document
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+      security:
+      - BearerAuth: []
+  /api/system/metrics:
+    get:
+      tags:
+      - System
+      summary: Get system metrics
+      description: Retrieve system usage metrics
+      operationId: get_metrics_resource
+      responses:
+        "200":
+          description: System metrics returned successfully
+          content: {}
+  /api/system/status:
+    get:
+      tags:
+      - System
+      summary: System status check
+      description: Check if the system is running
+      operationId: get_status_resource
+      responses:
+        "200":
+          description: System is up and running
+          content: {}
+  /api/system/version:
+    get:
+      tags:
+      - System
+      summary: Get current system version
+      description: Get the current version of the system
+      operationId: get_version_resource
+      responses:
+        "200":
+          description: Version returned successfully
+          content: {}
+  /api/users/login:
+    post:
+      tags:
+      - Users
+      summary: Log in a user
+      description: Authenticate user and return access token
+      operationId: post_login_resource
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Login'
+        required: true
+      responses:
+        "201":
+          description: Login was successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenResponse'
+        "401":
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+      security: []
+      x-codegen-request-body-name: payload
+  /api/users/logout:
+    get:
+      tags:
+      - Users
+      summary: Log out the current user
+      description: Logout the current user by unsetting JWT cookies
+      operationId: get_logout_resource
+      responses:
+        "200":
+          description: Logout successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+        "401":
+          description: Missing JWT in headers or cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+      security:
+      - BearerAuth: []
+  /api/users/refresh:
+    post:
+      tags:
+      - Users
+      summary: Refresh the access token
+      description: Use refresh token to obtain a new access token
+      operationId: post_refresh_resource
+      responses:
+        "200":
+          description: Token refreshed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+        "401":
+          description: Missing JWT in headers or cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+      security:
+      - BearerAuth: []
+  /api/users/register:
+    post:
+      tags:
+      - Users
+      summary: Register a new user
+      description: Register a new user and set tokens
+      operationId: post_register_resource
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Register'
+        required: true
+      responses:
+        "201":
+          description: User created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenResponse'
+        "409":
+          description: User already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+      security: []
+      x-codegen-request-body-name: payload
+  /api/users/{user_id}:
+    delete:
+      tags:
+      - Users
+      summary: Delete the authenticated user
+      description: Delete the authenticated user and clear cookies
+      operationId: delete_user_resource
+      parameters:
+      - name: user_id
+        in: path
+        required: true
+        schema:
+          type: integer
+      responses:
+        "200":
+          description: User was deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+        "401":
+          description: Missing JWT in headers or cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+        "403":
+          description: User is not authorized to perform this action
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+      security:
+      - BearerAuth: []
+    patch:
+      tags:
+      - Users
+      summary: Update the password for the authenticated user
+      description: Update the password for the authenticated user
+      operationId: patch_user_resource
+      parameters:
+      - name: user_id
+        in: path
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PasswordUpdate'
+        required: true
+      responses:
+        "200":
+          description: Password updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+        "400":
+          description: Same password
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+        "401":
+          description: Missing JWT in headers or cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+        "403":
+          description: User is not authorized to perform this action
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+      security:
+      - BearerAuth: []
+      x-codegen-request-body-name: payload
+components:
+  schemas:
+    Login:
+      required:
+      - password
+      - username
+      type: object
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+    TokenResponse:
+      type: object
+      properties:
+        message:
+          type: string
+        access_token:
+          type: string
+    MessageResponse:
+      type: object
+      properties:
+        message:
+          type: string
+    Register:
+      required:
+      - password
+      - username
+      type: object
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+    PasswordUpdate:
+      required:
+      - password
+      type: object
+      properties:
+        password:
+          type: string
+    Document:
+      type: object
+      properties:
+        document_id:
+          type: integer
+        document_name:
+          type: string
+    Message:
+      type: object
+      properties:
+        message:
+          type: string
+    DocumentContent:
+      type: object
+      properties:
+        document_id:
+          type: integer
+        document_contents:
+          type: string
+    HuffmanEncodedDocumentContent:
+      type: object
+      properties:
+        document_id:
+          type: integer
+        huffman_encoded_document_contents:
+          type: string
+    DocumentStatistics:
+      required:
+      - document_id
+      type: object
+      properties:
+        document_id:
+          type: integer
+        tf:
+          type: object
+          properties: {}
+        collections_data:
+          type: object
+          properties: {}
+        message:
+          type: string
+    CollectionInput:
+      required:
+      - collection_name
+      type: object
+      properties:
+        collection_name:
+          type: string
+    Collection:
+      type: object
+      properties:
+        collection_id:
+          type: integer
+        documents:
+          type: array
+          items:
+            $ref: '#/components/schemas/Document'
+    CollectionStatistics:
+      type: object
+      properties:
+        collection_id:
+          type: integer
+        tf:
+          type: object
+          properties: {}
+        idf:
+          type: object
+          properties: {}
+        message:
+          type: string
+  responses:
+    ParseError:
+      description: When a mask can't be parsed
+      content: {}
+    MaskError:
+      description: When any error occurs on mask
+      content: {}
+  securitySchemes:
+    BearerAuth:
+      type: apiKey
+      description: "JWT Authorization header using the Bearer scheme. Example: 'Bearer\
+        \ {token}'"
+      name: Authorization
+      in: header
+x-original-swagger-version: "2.0"
