@@ -17,6 +17,13 @@ class DocumentModel(db.Model):
     )
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
+    document_metric = db.relationship(
+        "DocumentMetricModel",
+        back_populates="document",
+        cascade="all, delete-orphan",
+        uselist=False
+    )
+
     collections = db.relationship(
         "DocumentCollectionModel",
         cascade="all, delete-orphan",

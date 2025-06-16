@@ -3,17 +3,24 @@ from datetime import datetime
 from app.database import db
 
 
-class FileMetricModel(db.Model):
-    __tablename__ = "file_metrics"
+class DocumentMetricModel(db.Model):
+    __tablename__ = "document_metrics"
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    filename = db.Column(db.String(100), nullable=False)
+    document_id = db.Column(
+        db.Integer,
+        db.ForeignKey("documents.id", ondelete="CASCADE"),
+        nullable=False,
+        unique=True
+    )
     word_count = db.Column(db.Integer, nullable=False)
-    file_size = db.Column(db.Integer, nullable=False)
+    size = db.Column(db.Integer, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
-    def __repr__(self):
-        return f"<FileMetricModel {self.id}: {self.filename}>"
+    document = db.relationship(
+        "DocumentModel", back_populates="document_metric"
+    )
 
-    def __str__(self):
-        return self.filename
+    def __repr__(self):
+        return (f"<DocumentMetricModel {self.id}: "
+                f"word_count={self.word_count}, size={self.size}>")
