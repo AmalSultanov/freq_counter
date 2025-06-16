@@ -1,0 +1,81 @@
+services:
+  app:
+    build: .
+    container_name: freq_counter
+    restart: always
+    env_file:
+      - .env
+    expose:
+      - "${FLASK_PORT}"
+    depends_on:
+      - metrics_db
+      - redis
+    volumes:
+      - .:/app
+      - ./app/media:/app/app/media
+    environment:
+      - VIRTUAL_HOST=${DOMAIN}
+      - LETSENCRYPT_HOST=${DOMAIN}
+      - LETSENCRYPT_EMAIL=${LETSENCRYPT_EMAIL}
+    command: >
+      sh -c "flask db upgrade && gunicorn -w 4 -b 0.0.0.0:${FLASK_PORT} run:app"
+
+  metrics_db:
+    image: postgres:16-alpine
+    container_name: metrics_db
+    restart: always
+    env_file:
+      - .env
+    expose:
+      - "${POSTGRES_PORT}"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7-alpine
+    container_name: redis
+    restart: always
+    env_file:
+      - .env
+    expose:
+      - "${CACHE_REDIS_PORT}"
+
+  nginx-proxy:
+    image: jwilder/nginx-proxy
+    container_name: nginx-proxy
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      - TRUST_DOWNSTREAM_PROXY=false
+    volumes:
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+      - nginx_certs:/etc/nginx/certs
+      - nginx_vhost:/etc/nginx/vhost.d
+      - nginx_html:/usr/share/nginx/html
+      - ./nginx/vhost.d:/etc/nginx/vhost.d:ro
+      - ./nginx/conf.d/rate_limit.conf:/etc/nginx/conf.d/rate_limit.conf:ro
+
+  letsencrypt:
+    image: nginxproxy/acme-companion
+    container_name: nginx-letsencrypt
+    restart: always
+    depends_on:
+      - nginx-proxy
+    env_file:
+      - .env
+    environment:
+      - DEFAULT_EMAIL=${LETSENCRYPT_EMAIL}
+      - NGINX_PROXY_CONTAINER=nginx-proxy
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - nginx_certs:/etc/nginx/certs
+      - nginx_vhost:/etc/nginx/vhost.d
+      - nginx_html:/usr/share/nginx/html
+
+volumes:
+  postgres_data:
+  nginx_certs:
+  nginx_vhost:
+  nginx_html:
