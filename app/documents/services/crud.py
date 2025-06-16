@@ -8,7 +8,7 @@ from app.documents.models import DocumentModel
 from app.documents.selectors import get_user_document
 from app.documents.services.checks import check_for_duplicates
 from app.shared.file_utils import save_uploaded_file, compute_content_hash
-from app.system.services import create_file_metric
+from app.system.services import create_document_metrics
 from app.users.services import get_user_by_username
 
 
@@ -23,7 +23,7 @@ def handle_document_upload(file: FileStorage, username: str) -> DocumentModel:
         file_path, contents, content_hash, user.id
     )
 
-    record_document_metrics(file_path, contents)
+    record_document_metrics(document.id, file_path, contents)
 
     return document
 
@@ -41,9 +41,11 @@ def create_and_store_document(
     return document
 
 
-def record_document_metrics(file_path: str, contents: str) -> None:
-    create_file_metric(
-        os.path.basename(file_path),
+def record_document_metrics(
+    document_id: int, file_path: str, contents: str
+) -> None:
+    create_document_metrics(
+        document_id,
         len(contents.split()),
         os.path.getsize(file_path)
     )
