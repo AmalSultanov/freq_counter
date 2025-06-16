@@ -8,8 +8,6 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from werkzeug.datastructures import FileStorage
 from werkzeug.utils import secure_filename
 
-from app.system.services import create_file_metric
-
 
 def get_table_data(file: FileStorage) -> list[dict[str, str | float | int]]:
     filename = secure_filename(file.filename)
@@ -17,10 +15,6 @@ def get_table_data(file: FileStorage) -> list[dict[str, str | float | int]]:
     file.save(filepath)
 
     content = read_file(filepath)
-    word_count = len(content.split())
-    file_size = os.path.getsize(filepath)
-
-    create_file_metric(filename, word_count, file_size)
     df = create_df_from_text(content)
 
     return df.to_dict(orient="records")
@@ -48,7 +42,7 @@ def tokenize_text(text: str) -> list[str]:
 
 
 def calculate_tf_idf(
-    word_counts: Counter, total_words: int
+        word_counts: Counter, total_words: int
 ) -> dict[str, list[str | float | int]]:
     table_data = {"word": [], "tf": [], "idf": []}
 
