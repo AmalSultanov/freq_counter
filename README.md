@@ -7,7 +7,7 @@ basic interaction.
 
 ---
 
-## Contents
+## 🗂️ Contents
 
 * [Project Structure](#-project-structure)
 * [Entities Involved](#%EF%B8%8F-entities-involved)
