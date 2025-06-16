@@ -40,8 +40,8 @@ class DocumentCollectionModelView(BaseReadOnlyModelView):
     ]
 
 
-class FileMetricModelView(BaseReadOnlyModelView):
-    form_columns = ["filename", "word_count", "file_size"]
-    column_list = ["id", "filename", "word_count", "file_size", "created_at"]
-    column_searchable_list = ["filename", "word_count", "file_size"]
-    column_filters = ["filename", "word_count", "file_size", "created_at"]
+class DocumentMetricModelView(BaseReadOnlyModelView):
+    form_columns = ["word_count", "size"]
+    column_list = ["id", "word_count", "size", "document", "created_at"]
+    column_searchable_list = ["word_count", "size"]
+    column_filters = ["word_count", "size", "document.name", "created_at"]
