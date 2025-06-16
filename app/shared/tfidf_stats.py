@@ -30,7 +30,7 @@ def get_document_tf(document_contents: str) -> dict[str, float] | None:
 
 def calculate_tf(word_counts: Counter, total_words: int) -> dict[str, float]:
     return {
-        word: round(count / total_words, 3)
+        word: count / total_words
         for word, count in word_counts.items()
     }
 
@@ -58,6 +58,6 @@ def calculate_idf(
 
     idf = {}
     for word, df in document_frequencies.items():
-        idf[word] = round(math.log(number_of_documents / (1 + df)), 3)
+        idf[word] = math.log((number_of_documents + 1) / (1 + df))
 
     return idf
