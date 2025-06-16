@@ -149,11 +149,12 @@ class CollectionStatisticsResource(SecuredResource):
     def get(self, collection_id):
         """Get collection TF-IDF statistics"""
         number_of_documents, tf, idf = get_collection_stats(collection_id)
-        response = {"collection_id": collection_id, "tf": tf}
+        response = {"collection_id": collection_id}
 
         if number_of_documents == 0:
             response["message"] = "No documents in collection were found"
         elif number_of_documents == 1:
+            response["tf"] = tf
             response["message"] = ("There is only one document in this "
                                    "collection, IDF is unavailable")
         else:
