@@ -43,7 +43,7 @@ def create_app():
     jwt.init_app(app)
     cache.init_app(app)
 
-    from app.system.models import FileMetricModel
+    from app.system.models import DocumentMetricModel
     from app.collections.models import CollectionModel
     from app.documents.models import DocumentModel
     from app.users.models import UserModel
