@@ -48,7 +48,7 @@ def calculate_tf_idf(
 
     for word, count in word_counts.items():
         table_data["word"].append(word)
-        table_data["tf"].append(round(count / total_words, 3))
+        table_data["tf"].append(count / total_words)
         # log10(1/1) = 0 for all words since only 1 document is uploaded
         table_data["idf"].append(0)
 
