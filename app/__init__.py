@@ -55,7 +55,7 @@ def create_app():
 
     api = Api(
         app,
-        version="0.2.0",
+        version="1.2.0",
         title="Word Frequency Counter: TF-IDF Analyzer API",
         description="API for TF-IDF calculations on documents and collections "
                     "managed by users. Also includes system-level endpoints.",
