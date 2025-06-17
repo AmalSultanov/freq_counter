@@ -2,4 +2,5 @@ limit_req zone=global_req_zone burst=2 nodelay;
 
 location /swaggerui/ {
     limit_req zone=global_req_zone burst=2 nodelay;
+    proxy_pass http://app:${FLASK_PORT};
 }
