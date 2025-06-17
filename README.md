@@ -102,13 +102,13 @@ freq_counter/
 ├── migrations/                   # Alembic migrations
 ├── nginx/                        # Nginx related configurations
 ├── .dockerignore                 
-├── .env                          
 ├── .env.example                  # Sample .env
 ├── .gitignore                    
 ├── CHANGELOG.md                  # Leave your feedback here in designated section
-├── docker-compose.yml            
 ├── Dockerfile                     
 ├── README.md                     
+├── docker-compose.prod.yml            
+├── docker-compose.yml            
 ├── requirements.txt              
 └── run.py                        
 ```
