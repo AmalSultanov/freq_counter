@@ -48,7 +48,6 @@ freq_counter/
 │   │   ├── decorators.py         # Decorators for validating collections before operating over them
 │   │   ├── models.py             # SQLAlchemy models
 │   │   ├── namespace.py          # Namespace registration, like a blueprint
-│   │   ├── routes.py             # Placeholder for future web views
 │   │   └── selectors.py          # Business logic (getter functions) 
 │   │
 │   ├── documents/                # Handles document upload, processing, and metadata
@@ -60,7 +59,6 @@ freq_counter/
 │   │   ├── error_handlers.py     # Custom error handlers 
 │   │   ├── models.py             # SQLAlchemy models
 │   │   ├── namespace.py          # Namespace registration, like a blueprint
-│   │   ├── routes.py             # Placeholder for future web views
 │   │   └── selectors.py          # Business logic (getter functions) 
 │   │
 │   ├── media/                    # Directory for storing uploaded text documents
