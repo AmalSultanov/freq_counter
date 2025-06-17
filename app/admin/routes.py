@@ -54,10 +54,13 @@ def login():
         password = request.form.get("password")
 
         user = get_user_by_username(username)
-        result = authenticate_user(username, password)
 
-        if "message" in result:
-            flash(result["message"], "danger")
+        if user is None:
+            flash("User with this username does not exist", "danger")
+            return render_template("admin/login.html")
+
+        if not user.check_password(password):
+            flash("Invalid password", "danger")
             return render_template("admin/login.html")
 
         if not user.is_admin:
