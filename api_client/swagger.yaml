@@ -44,7 +44,8 @@ paths:
       tags:
       - Collections
       summary: Create a new collection
-      description: Create a new collection
+      description: Create a new collection. **Note:** Clients must send the `csrf_access_token`
+        cookie value in the `X-CSRF-TOKEN` header every time they call this endpoint
       operationId: post_collection_list_resource
       requestBody:
         content:
@@ -110,7 +111,8 @@ paths:
       - Collections
       summary: Delete collection
       description: "Delete a collection, documents in it will be unlinked from this\
-        \ collection but not deleted"
+        \ collection but not deleted. **Note:** Clients must send the `csrf_access_token`\
+        \ cookie value in the `X-CSRF-TOKEN` header every time they call this endpoint"
       operationId: delete_collection_documents_resource
       parameters:
       - name: collection_id
@@ -144,7 +146,9 @@ paths:
       tags:
       - Collections
       summary: Update collection name
-      description: Update the name of particular collection
+      description: Update the name of particular collection. **Note:** Clients must
+        send the `csrf_access_token` cookie value in the `X-CSRF-TOKEN` header every
+        time they call this endpoint
       operationId: patch_collection_documents_resource
       parameters:
       - name: collection_id
@@ -215,7 +219,9 @@ paths:
       tags:
       - Collections
       summary: Add document to collection
-      description: Add a document to a collection
+      description: Add a document to a collection. **Note:** Clients must send the
+        `csrf_access_token` cookie value in the `X-CSRF-TOKEN` header every time they
+        call this endpoint
       operationId: post_collection_document_resource
       parameters:
       - name: document_id
@@ -261,7 +267,9 @@ paths:
       tags:
       - Collections
       summary: Remove document from collection
-      description: Remove a document from a collection
+      description: Remove a document from a collection. **Note:** Clients must send
+        the `csrf_access_token` cookie value in the `X-CSRF-TOKEN` header every time
+        they call this endpoint
       operationId: delete_collection_document_resource
       parameters:
       - name: document_id
@@ -332,7 +340,8 @@ paths:
       - Documents
       summary: Upload a document
       description: Upload a new .txt document. The size of it should not exceed 3
-        MB
+        MB. **Note:** Clients must send the `csrf_access_token` cookie value in the
+        `X-CSRF-TOKEN` header every time they call this endpoint
       operationId: post_documents_list_resource
       requestBody:
         content:
@@ -419,7 +428,8 @@ paths:
       tags:
       - Documents
       summary: Delete a document
-      description: Delete a document by ID
+      description: Delete a document by ID. **Note:** Clients must send the `csrf_access_token`
+        cookie value in the `X-CSRF-TOKEN` header every time they call this endpoint
       operationId: delete_document_contents_resource
       parameters:
       - name: document_id
@@ -609,7 +619,9 @@ paths:
       tags:
       - Users
       summary: Refresh the access token
-      description: Use refresh token to obtain a new access token
+      description: Use refresh token to obtain a new access token. **Note:** Clients
+        must send the `csrf_refresh_token` cookie value in the `X-CSRF-TOKEN` header
+        every time they call this endpoint
       operationId: post_refresh_resource
       responses:
         "200":
@@ -620,6 +632,12 @@ paths:
                 $ref: '#/components/schemas/MessageResponse'
         "401":
           description: Missing JWT in headers or cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+        "422":
+          description: Unprocessable entity
           content:
             application/json:
               schema:
@@ -659,7 +677,9 @@ paths:
       tags:
       - Users
       summary: Delete the authenticated user
-      description: Delete the authenticated user and clear cookies
+      description: Delete the authenticated user and clear cookies. **Note:** Clients
+        must send the `csrf_access_token` cookie value in the `X-CSRF-TOKEN` header
+        every time they call this endpoint
       operationId: delete_user_resource
       parameters:
       - name: user_id
@@ -692,7 +712,9 @@ paths:
       tags:
       - Users
       summary: Update the password for the authenticated user
-      description: Update the password for the authenticated user
+      description: Update the password for the authenticated user. **Note:** Clients
+        must send the `csrf_access_token` cookie value in the `X-CSRF-TOKEN` header
+        every time they call this endpoint
       operationId: patch_user_resource
       parameters:
       - name: user_id
@@ -775,17 +797,17 @@ components:
       properties:
         password:
           type: string
+    Message:
+      type: object
+      properties:
+        message:
+          type: string
     Document:
       type: object
       properties:
         document_id:
           type: integer
         document_name:
-          type: string
-    Message:
-      type: object
-      properties:
-        message:
           type: string
     DocumentContent:
       type: object
