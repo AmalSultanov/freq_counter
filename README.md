@@ -231,7 +231,7 @@ This backend provides the following main API groups:
 | `GET`    | `/system/version`                            | Get the current version of the system.                                                                             |       ❌       |
 
 
-### Web TF-IDF ()
+### Web TF-IDF
 
 | Method | URL                                            | Description                                                                                                        | Auth Required |
 |--------|------------------------------------------------|--------------------------------------------------------------------------------------------------------------------|:-------------:|
