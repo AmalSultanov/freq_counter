@@ -5,15 +5,20 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+
+def str_to_bool(value: str) -> bool:
+    return str(value).strip().lower() in ("true", "1")
+
+
 flask_port = os.getenv("FLASK_PORT")
-flask_debug = os.getenv("FLASK_DEBUG")
+flask_debug = str_to_bool(os.getenv("FLASK_DEBUG"))
 flask_env = os.getenv("FLASK_ENV")
 flask_secret_key = os.getenv("FLASK_SECRET_KEY")
 flask_admin_secret_key = os.getenv("FLASK_ADMIN_SECRET_KEY")
 
 jwt_secret_key = os.getenv("JWT_SECRET_KEY")
-jwt_cookie_csrf_protect = os.getenv("JWT_COOKIE_CSRF_PROTECT")
-jwt_cookie_secure = os.getenv("JWT_COOKIE_SECURE")
+jwt_cookie_csrf_protect = str_to_bool(os.getenv("JWT_COOKIE_CSRF_PROTECT"))
+jwt_cookie_secure = str_to_bool(os.getenv("JWT_COOKIE_SECURE"))
 jwt_access_token_expires_minutes = int(os.getenv(
     "JWT_ACCESS_TOKEN_EXPIRES_MINUTES"
 ))
