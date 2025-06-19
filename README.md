@@ -184,7 +184,7 @@ This backend provides the following main API groups:
 - `/users/*` - User registration, login, and token handling  
 - `/system/*` - Runtime metrics and status  
 - `/tfidf/*` - TF-IDF values calculations with a web interface
-> ⚠️ Note: The web interface currently supports only a single document and exclusively TF analysis (still under development). Use the API for multi-document collection support with full TF-IDF statistics.
+> ⚠️ Note: The web interface supports only a single document and exclusively the TF analysis. Use the API for multi-document collection support with full TF-IDF statistics.
 
 ### 🧩️ API Endpoints
 
@@ -229,6 +229,15 @@ This backend provides the following main API groups:
 | `GET`    | `/system/status`                             | Check if the system is running.                                                                                    |       ❌       |
 | `GET`    | `/system/metrics`                            | Retrieve system usage metrics.                                                                                     |       ❌       |
 | `GET`    | `/system/version`                            | Get the current version of the system.                                                                             |       ❌       |
+
+
+### Web TF-IDF ()
+
+| Method | URL                                            | Description                                                                                                        | Auth Required |
+|--------|------------------------------------------------|--------------------------------------------------------------------------------------------------------------------|:-------------:|
+| `GET`  | `/tfidf                                    `   | Get the HTML template with form to upload a document.                                                              |       ❌       |
+| `POST` | `/tfidf                                    `   | Get TF values for the top 50 words from the uploaded document.                                                     |       ❌       |
+
 
 ### 🧪 Interactive API Docs
 
