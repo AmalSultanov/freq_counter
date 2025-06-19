@@ -56,7 +56,9 @@ class CollectionListResource(SecuredResource):
         return result, 200
 
     @api.doc(
-        description="Create a new collection",
+        description="Create a new collection. **Note:** Clients must send "
+                    "the `csrf_access_token` cookie value in the "
+                    "`X-CSRF-TOKEN` header every time they call this endpoint",
         security="BearerAuth",
         responses={
             201: ("Collection created", message_model),
@@ -97,7 +99,10 @@ class CollectionDocumentsResource(SecuredResource):
         return {"document_ids": document_ids}, 200
 
     @api.doc(
-        description="Update the name of particular collection",
+        description="Update the name of particular collection. "
+                    "**Note:** Clients must send the `csrf_access_token` "
+                    "cookie value in the `X-CSRF-TOKEN` header every time "
+                    "they call this endpoint",
         security="BearerAuth",
         responses={
             200: ("Collection was removed", message_model),
@@ -107,6 +112,7 @@ class CollectionDocumentsResource(SecuredResource):
     )
     @api.expect(collection_input)
     @ensure_user_collection_exists
+    @check_collection_not_exists
     def patch(self, collection_id):
         """Update collection name"""
         username = get_jwt_identity()
@@ -117,7 +123,10 @@ class CollectionDocumentsResource(SecuredResource):
 
     @api.doc(
         description="Delete a collection, documents in it will be "
-                    "unlinked from this collection but not deleted",
+                    "unlinked from this collection but not deleted. "
+                    "**Note:** Clients must send the `csrf_access_token` "
+                    "cookie value in the `X-CSRF-TOKEN` header every time "
+                    "they call this endpoint",
         security="BearerAuth",
         responses={
             200: ("Collection was removed", message_model),
@@ -158,6 +167,7 @@ class CollectionStatisticsResource(SecuredResource):
             response["message"] = ("There is only one document in this "
                                    "collection, IDF is unavailable")
         else:
+            response["tf"] = tf
             response["idf"] = idf
 
         return response, 200
@@ -168,7 +178,9 @@ class CollectionStatisticsResource(SecuredResource):
 @api.param("document_id", "The document identifier")
 class CollectionDocumentResource(SecuredResource):
     @api.doc(
-        description="Add a document to a collection",
+        description="Add a document to a collection. **Note:** Clients must "
+                    "send the `csrf_access_token` cookie value in the "
+                    "`X-CSRF-TOKEN` header every time they call this endpoint",
         security="BearerAuth",
         responses={
             201: ("Document added", message_model),
@@ -187,7 +199,9 @@ class CollectionDocumentResource(SecuredResource):
         return {"message": "Document was added to collection"}, 201
 
     @api.doc(
-        description="Remove a document from a collection",
+        description="Remove a document from a collection. **Note:** Clients "
+                    "must send the `csrf_access_token` cookie value in the "
+                    "`X-CSRF-TOKEN` header every time they call this endpoint",
         security="BearerAuth",
         responses={
             200: ("Document was removed", message_model),

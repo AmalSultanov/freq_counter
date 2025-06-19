@@ -59,7 +59,9 @@ class DocumentsListResource(SecuredResource):
     @api.expect(upload_parser)
     @api.doc(
         description="Upload a new .txt document. "
-                    "The size of it should not exceed 3 MB",
+                    "The size of it should not exceed 3 MB. **Note:** Clients "
+                    "must send the `csrf_access_token` cookie value in the "
+                    "`X-CSRF-TOKEN` header every time they call this endpoint",
         security="BearerAuth",
         consumes=["multipart/form-data"],
         responses={
@@ -81,7 +83,8 @@ class DocumentsListResource(SecuredResource):
         document = handle_document_upload(file, username)
 
         return {
-            "message": f"Document with id = {document.id} was uploaded"}, 201
+            "message": f"Document with id = {document.id} was uploaded"
+        }, 201
 
 
 @api.route("/<int:document_id>")
@@ -107,7 +110,9 @@ class DocumentContentsResource(SecuredResource):
         }, 200
 
     @api.doc(
-        description="Delete a document by ID",
+        description="Delete a document by ID. **Note:** Clients must send the "
+                    "`csrf_access_token` cookie value in the `X-CSRF-TOKEN` "
+                    "header every time they call this endpoint",
         security="BearerAuth",
         responses={
             200: ("Document deleted", message_model),

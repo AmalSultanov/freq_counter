@@ -39,8 +39,10 @@ class LoginResource(Resource):
         response = {"message": "Login was successful",
                     "access_token": result["access_token"]}
         response = make_response(response, 201)
+
         set_access_cookies(response, result["access_token"])
         set_refresh_cookies(response, result["refresh_token"])
+
         return response
 
 
@@ -69,8 +71,10 @@ class RegisterResource(Resource):
             "access_token": tokens["access_token"]
         }
         response = make_response(response, 201)
+
         set_access_cookies(response, tokens["access_token"])
         set_refresh_cookies(response, tokens["refresh_token"])
+
         return response
 
 
@@ -91,6 +95,7 @@ class LogoutResource(Resource):
             "message": "Logout was successful"
         }, 200)
         unset_jwt_cookies(response)
+
         return response
 
 
@@ -99,7 +104,10 @@ class UserResource(Resource):
     @jwt_required()
     @authorize_user
     @api.doc(
-        description="Update the password for the authenticated user",
+        description="Update the password for the authenticated user. "
+                    "**Note:** Clients must send the `csrf_access_token` "
+                    "cookie value in the `X-CSRF-TOKEN` header every time "
+                    "they call this endpoint",
         security="BearerAuth",
         responses={
             200: ("Password updated", message_response),
@@ -130,7 +138,10 @@ class UserResource(Resource):
     @jwt_required()
     @authorize_user
     @api.doc(
-        description="Delete the authenticated user and clear cookies",
+        description="Delete the authenticated user and clear cookies. "
+                    "**Note:** Clients must send the `csrf_access_token` "
+                    "cookie value in the `X-CSRF-TOKEN` header every time "
+                    "they call this endpoint",
         security="BearerAuth",
         responses={
             200: ("User was deleted", message_response),
@@ -146,6 +157,7 @@ class UserResource(Resource):
             {"message": f"User '{user.username}' was deleted"}, 200
         )
         unset_jwt_cookies(response)
+
         return response
 
 
@@ -153,11 +165,15 @@ class UserResource(Resource):
 class RefreshResource(Resource):
     @jwt_required(refresh=True)
     @api.doc(
-        description="Use refresh token to obtain a new access token",
+        description="Use refresh token to obtain a new access token. "
+                    "**Note:** Clients must send the `csrf_refresh_token` "
+                    "cookie value in the `X-CSRF-TOKEN` header every time "
+                    "they call this endpoint",
         security="BearerAuth",
         responses={
             200: ("Token refreshed", message_response),
-            401: ("Missing JWT in headers or cookie", message_response)
+            401: ("Missing JWT in headers or cookie", message_response),
+            422: ("Unprocessable entity", message_response)
         }
     )
     def post(self):
