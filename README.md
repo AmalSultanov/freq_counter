@@ -235,8 +235,8 @@ This backend provides the following main API groups:
 
 | Method | URL                                            | Description                                                                                                        | Auth Required |
 |--------|------------------------------------------------|--------------------------------------------------------------------------------------------------------------------|:-------------:|
-| `GET`  | `/tfidf                                    `   | Get the HTML template with form to upload a document.                                                              |       ❌       |
-| `POST` | `/tfidf                                    `   | Get TF values for the top 50 words from the uploaded document.                                                     |       ❌       |
+| `GET`  | `/tfidf`                                       | Get the HTML template with form to upload a document.                                                              |       ❌       |
+| `POST` | `/tfidf`                                       | Get TF values for the top 50 words from the uploaded document.                                                     |       ❌       |
 
 
 ### 🧪 Interactive API Docs
