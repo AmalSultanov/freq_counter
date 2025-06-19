@@ -18,6 +18,8 @@ from app.system.namespace import api as system_ns
 from app.tfidf.routes import tfidf_bp
 from app.users import api_routes
 from app.users.namespace import api as users_ns
+from app.version import __version__
+
 
 authorizations = {
     'BearerAuth': {
@@ -55,13 +57,14 @@ def create_app():
 
     api = Api(
         app,
-        version="1.2.0",
+        version=__version__,
         title="Word Frequency Counter: TF-IDF Analyzer API",
         description="API for TF-IDF calculations on documents and collections "
                     "managed by users. Also includes system-level endpoints.",
         authorizations=authorizations,
         doc="/api/docs"
     )
+
     api.add_namespace(users_ns, path="/api/users")
     api.add_namespace(documents_ns, path="/api/documents")
     api.add_namespace(collections_ns, path="/api/collections")
