@@ -13,7 +13,6 @@ from app.database import db
 from app.documents import api_routes
 from app.documents.namespace import api as documents_ns
 from app.extensions import bcrypt, jwt, cache
-from app.shared.error_handlers import register_error_handlers
 from app.system import api_routes
 from app.system.namespace import api as system_ns
 from app.tfidf.routes import tfidf_bp
@@ -44,8 +43,6 @@ def create_app():
     bcrypt.init_app(app)
     jwt.init_app(app)
     cache.init_app(app)
-
-    register_error_handlers(app)
 
     from app.system.models import DocumentMetricModel
     from app.collections.models import CollectionModel

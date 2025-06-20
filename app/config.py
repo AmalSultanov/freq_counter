@@ -70,7 +70,7 @@ class DevelopmentConfig(Config):
 
 
 class ProductionConfig(Config):
-    pass
+    PROPAGATE_EXCEPTIONS = True
 
 
 config_by_name = {"dev": DevelopmentConfig, "prod": ProductionConfig}
