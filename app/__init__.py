@@ -1,7 +1,6 @@
 import os
 
-from flask import Flask, redirect, jsonify
-from flask_jwt_extended.exceptions import CSRFError
+from flask import Flask, redirect
 from flask_migrate import Migrate
 from flask_restx import Api
 
@@ -14,13 +13,13 @@ from app.database import db
 from app.documents import api_routes
 from app.documents.namespace import api as documents_ns
 from app.extensions import bcrypt, jwt, cache
+from app.shared.error_handlers import register_error_handlers
 from app.system import api_routes
 from app.system.namespace import api as system_ns
 from app.tfidf.routes import tfidf_bp
 from app.users import api_routes
 from app.users.namespace import api as users_ns
 from app.version import __version__
-
 
 authorizations = {
     'BearerAuth': {
@@ -46,6 +45,8 @@ def create_app():
     jwt.init_app(app)
     cache.init_app(app)
 
+    register_error_handlers(app)
+
     from app.system.models import DocumentMetricModel
     from app.collections.models import CollectionModel
     from app.documents.models import DocumentModel
@@ -55,10 +56,6 @@ def create_app():
     @app.route("/")
     def index():
         return redirect("/tfidf")
-
-    @app.errorhandler(CSRFError)
-    def handle_csrf_error(e):
-        return jsonify({"message": str(e)}), 401
 
     api = Api(
         app,
