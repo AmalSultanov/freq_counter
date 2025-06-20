@@ -1,6 +1,7 @@
 import os
 
-from flask import Flask, redirect
+from flask import Flask, redirect, jsonify
+from flask_jwt_extended.exceptions import CSRFError
 from flask_migrate import Migrate
 from flask_restx import Api
 
@@ -54,6 +55,10 @@ def create_app():
     @app.route("/")
     def index():
         return redirect("/tfidf")
+
+    @app.errorhandler(CSRFError)
+    def handle_csrf_error(e):
+        return jsonify({"message": str(e)}), 401
 
     api = Api(
         app,
